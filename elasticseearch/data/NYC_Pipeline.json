@@ -1,0 +1,18 @@
+{
+ "description": "Parsing the NYC stations",
+ "processors": [
+   {
+     "grok": {
+       "field": "station",
+       "patterns": [
+         "%{WORD:division},%{DATA:line},%{DATA:station_name},%{NUMBER:location.lat},%{NUMBER:location.lon},%{DATA},%{DATA},%{DATA},%{DATA},%{DATA},%{DATA},%{DATA},%{DATA},%{DATA},%{DATA},%{DATA},%{DATA:entrance_type},%{DATA:entry},%{DATA:exit_only},%{DATA:vending},%{DATA:staffing},%{DATA:staff_hours},%{DATA:ada},%{DATA:ada_notes},%{DATA:free_crossover},%{DATA:north_south_street},%{DATA:east_west_street},%{DATA:corner},%{NUMBER:entrance.lat},%{NUMBER:entrance.lon}"
+       ]
+     }
+   },
+   {
+     "remove": {
+       "field": "station"
+     }
+   }
+ ]
+}

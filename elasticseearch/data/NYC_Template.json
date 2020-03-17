@@ -1,0 +1,28 @@
+{
+  "template": "subway_info*",
+	"settings": {
+	  "number_of_replicas": "0",
+	  "number_of_shards": 1
+ },
+ "mappings": {
+     "properties": {
+       "station_name": { "type": "text" },
+       "location": { "type": "geo_point" },
+       "entry": { "type": "text" },
+       "exit_only": { "type": "text" },
+       "east_west_street": { "type": "text" },
+       "north_south_street": { "type": "text" },
+       "line": { "type": "text" },
+       "vending": { "type": "text" },
+       "staffing": { "type": "text" },
+       "division": { "type": "keyword" },
+       "corner": { "type": "text" },
+       "entrance": { "type": "geo_point" },
+       "entrance_type": { "type": "text" },
+       "ada": { "type": "text" },
+       "ada_notes": { "type": "text" },
+       "free_crossover": { "type": "text" },
+       "staff_hours": { "type": "text" }
+     }
+ }
+}

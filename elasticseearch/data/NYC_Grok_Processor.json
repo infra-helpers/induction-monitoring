@@ -1,0 +1,31 @@
+{
+ "pipeline": {
+   "description": "Parsing the NYC stations",
+   "processors": [
+     {
+       "grok": {
+         "field": "station",
+         "patterns": [
+           "%{WORD:division},%{DATA:line},%{DATA:station_name},%{NUMBER:location.lat},%{NUMBER:location.lon},%{DATA},%{DATA},%{DATA},%{DATA},%{DATA},%{DATA},%{DATA},%{DATA},%{DATA},%{DATA},%{DATA},%{DATA:entrance_type},%{DATA:entry},%{DATA:exit_only},%{DATA:vending},%{DATA:staffing},%{DATA:staff_hours},%{DATA:ada},%{DATA:ada_notes},%{DATA:free_crossover},%{DATA:north_south_street},%{DATA:east_west_street},%{DATA:corner},%{NUMBER:entrance.lat},%{NUMBER:entrance.lon}"
+         ]
+       }
+     },
+     {
+       "remove": {
+         "field": "station"
+       }
+     }
+   ]
+ },
+"docs": [
+   {
+     "_index": "subway_info",
+     "_type": "station",
+     "_id": "AVvJZVQEBr2flFKzrrkr",
+     "_score": 1,
+     "_source": {
+       "station": "BMT,4 Avenue,25th St,40.660397,-73.998091,R,,,,,,,,,,,Stair,YES,,YES,NONE,,FALSE,,FALSE,4th Ave,25th St,SW,40.660489,-73.99822"
+     }
+   }
+ ]
+}
