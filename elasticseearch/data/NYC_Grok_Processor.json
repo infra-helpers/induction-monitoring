@@ -14,6 +14,14 @@
        "remove": {
          "field": "station"
        }
+     },
+     {
+       "date" : {
+         "field" : "timestamp",
+         "target_field" : "timestamp",
+         "formats" : ["yyyy-MM-dd HH:mm:ss"],
+         "timezone" : "Europe/Paris"
+       }
      }
    ]
  },
@@ -24,6 +32,7 @@
      "_id": "AVvJZVQEBr2flFKzrrkr",
      "_score": 1,
      "_source": {
+       "timestamp": "2020-03-20 15:12:23",
        "station": "BMT,4 Avenue,25th St,40.660397,-73.998091,R,,,,,,,,,,,Stair,YES,,YES,NONE,,FALSE,,FALSE,4th Ave,25th St,SW,40.660489,-73.99822"
      }
    }

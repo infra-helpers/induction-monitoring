@@ -7,11 +7,22 @@ Induction to Monitoring
   + [EFK (ElasticSearch, Fluentd, Kibana](https://docs.fluentd.org/v/0.12/articles/docker-logging-efk-compose)
   + [Kibana](https://www.elastic.co/products/kibana)
   + [Fluentd](https://www.fluentd.org/)
-* [Indexing your CSV files with Elasticsearch Ingest Node](https://www.elastic.co/blog/indexing-csv-elasticsearch-ingest-node)
-* [Elasticsearch geo-point](https://www.elastic.co/guide/en/elasticsearch/reference/current/geo-point.html)
-* [Elasticsearch - Grok processor](https://www.elastic.co/guide/en/elasticsearch/reference/current/grok-processor.html)
-* [Elasticsearch - Populate](https://www.tutorialspoint.com/elasticsearch/elasticsearch_populate.htm)
 * [How to install Python virtual environments with Pyenv and `pipenv`](http://github.com/machine-learning-helpers/induction-python/tree/master/installation/virtual-env)
+
+## ElasticSearch (ES)
+* [Elasticsearch geo-point](https://www.elastic.co/guide/en/elasticsearch/reference/current/geo-point.html)
+
+### Ingest processors
+* Main: https://www.elastic.co/guide/en/elasticsearch/reference/current/ingest-processors.html
+* [Grok processor](https://www.elastic.co/guide/en/elasticsearch/reference/current/grok-processor.html)
+* [CSV processor](https://www.elastic.co/guide/en/elasticsearch/reference/current/csv-processor.html)
+* [Date processor](https://www.elastic.co/guide/en/elasticsearch/reference/current/date-processor.html)
+* [Script processor](https://www.elastic.co/guide/en/elasticsearch/reference/current/script-processor.html)
+
+### Use cases
+* [Elasticsearch - Populate](https://www.tutorialspoint.com/elasticsearch/elasticsearch_populate.htm)
+* [Indexing your CSV files with Elasticsearch Ingest Node](https://www.elastic.co/blog/indexing-csv-elasticsearch-ingest-node)
+
 
 # Overview
 [That repository](https://github.com/infra-helpers/induction-monitoring) aims
@@ -458,6 +469,7 @@ $ curl -XPOST "http://localhost:9200/_ingest/pipeline/_simulate" -H "Content-Typ
           "entrance_type": "Stair",
           "ada_notes": "",
           "free_crossover": "FALSE",
+          "timestamp": "2020-03-20T15:12:23.000+01:00",
           "staff_hours": "",
           "ada": "FALSE"
         },
