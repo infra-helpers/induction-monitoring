@@ -1,5 +1,75 @@
-Induction to Monitoring
-=======================
+Induction to Monitoring - ElasticSearch (ES) for Open Travel Data (OPTD) QA
+===========================================================================
+
+![Photo by Will van Wingerden on Unsplash](https://github.com/infra-helpers/induction-monitoring/tree/master/img/will-van-wingerden-cZVthlrnlnQ-unsplash.jpg)
+
+# Overview
+[That repository](https://github.com/infra-helpers/induction-monitoring)
+aims at providing end-to-end examples introducing how to collect, store
+and query metering events, produced by different sensors on local as well
+as on clouds.
+
+Although the software stacks are very similar with logging,
+their purpose is different. See the [GitHub repository dedicated to
+logging](https://github.com/infra-helpers/induction-logging)
+for further details.
+
+In those tutorials, Elastic Search (ES) stacks (_e.g._, ELK, EFK) are used.
+A full end-to-end example is explained step by step, and actually used for the
+[Quality Assurance (QA)](https://github.com/opentraveldata/quality-assurance)
+of the [Open Travel Data (OPTD)
+project](https://github.com/opentraveldata/opentraveldata).
+
+The full details on how to setup an ES cluster on Proxmox LXC containers
+are given in the [dedicated `elasticsearch`
+sub-folder](https://github.com/infra-helpers/induction-monitoring/tree/master/elasticseearch/).
+Such an ES cluster is actually the publishing target of the
+[Quality Assurance (QA)](https://github.com/opentraveldata/quality-assurance)
+events of the [Open Travel Data (OPTD)
+project](https://github.com/opentraveldata/opentraveldata),
+produced by the [OPTD Travis CI/CD
+process](https://travis-ci.org/github/opentraveldata/opentraveldata).
+
+For convenience, most of the ES examples are demonstrated both on a local
+single-node installation (_e.g._, on a laptop) and on on the above-mentioned
+cluster.
+
+## Endpoints
+* ElasticSearch (ES):
+  + Local installation: http://localhost:9200
+  + Remote cluster (through SSH tunnel): http://localhost:9400
+* Kibana:
+  + Local installation: http://localhost:5601
+  + Remote cluster: https://kibana.example.com
+  + Index management:
+    - Local indices: http://localhost:5601/app/kibana#/management/elasticsearch/index_management/indices
+	- Remote indices: https://kibana.example.com/app/kibana#/management/elasticsearch/index_management/indices
+	- Local index templates: http://localhost:5601/app/kibana#/management/elasticsearch/index_management/templates
+	- Remote index templates: https://kibana.example.com/app/kibana#/management/elasticsearch/index_management/templates
+	- Local index patterns: http://localhost:5601/app/kibana#/management/kibana/index_patterns/
+	- Remote index patterns: https://kibana.example.com/app/kibana#/management/kibana/index_patterns/
+  + DevTool console:
+    - Local installation: http://localhost:5601/app/kibana#/dev_tools/console
+	- Remote cluster: https://kibana.example.com/app/kibana#/dev_tools/console
+
+# Table of Content (ToC)
+- [Induction to Monitoring - ElasticSearch (ES) for Open Travel Data (OPTD) QA](#induction-to-monitoring---elasticsearch--es--for-open-travel-data--optd--qa)
+- [Overview](#overview)
+  * [Endpoints](#endpoints)
+- [Table of Content (ToC)](#table-of-content--toc-)
+- [References](#references)
+    + [Ingest processors](#ingest-processors)
+    + [Use cases](#use-cases)
+  * [Open Travel Data (OPTD)](#open-travel-data--optd-)
+- [Configuration](#configuration)
+  * [SSH tunnel to remote ES server](#ssh-tunnel-to-remote-es-server)
+  * [Kibana](#kibana)
+  * [Grok processor](#grok-processor)
+- [Build a CSV to JSON pipeline](#build-a-csv-to-json-pipeline)
+  * [School data](#school-data)
+  * [New York](#new-york)
+
+<small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
 
 # References
 * [Prometheus](https://prometheus.io/)
@@ -8,9 +78,6 @@ Induction to Monitoring
   + [Kibana](https://www.elastic.co/products/kibana)
   + [Fluentd](https://www.fluentd.org/)
 * [How to install Python virtual environments with Pyenv and `pipenv`](http://github.com/machine-learning-helpers/induction-python/tree/master/installation/virtual-env)
-
-## ElasticSearch (ES)
-* [Elasticsearch geo-point](https://www.elastic.co/guide/en/elasticsearch/reference/current/geo-point.html)
 
 ### Ingest processors
 * Main: https://www.elastic.co/guide/en/elasticsearch/reference/current/ingest-processors.html
@@ -23,29 +90,22 @@ Induction to Monitoring
 * [Elasticsearch - Populate](https://www.tutorialspoint.com/elasticsearch/elasticsearch_populate.htm)
 * [Indexing your CSV files with Elasticsearch Ingest Node](https://www.elastic.co/blog/indexing-csv-elasticsearch-ingest-node)
 
-
-# Overview
-[That repository](https://github.com/infra-helpers/induction-monitoring) aims
-at providing end-to-end examples introducing how to collect, store
-and query metering events, produced by different sensors
-on local as well as on clouds.
-
-Although the software stacks are very similar with logging,
-the purpose is different. See the
-[GitHub repository dedicated to logging](https://github.com/infra-helpers/induction-logging)
-for further details.
-
-## Endpoints
-* ElasticSearch (ES): http://localhost:9200
-* Kibana:
-  + http://localhost:5601
-  + Index manageement:
-    - Indices: http://localhost:5601/app/kibana#/management/elasticsearch/index_management/indices
-	- Index templates: http://localhost:5601/app/kibana#/management/elasticsearch/index_management/templates
-  + DevTool console: http://localhost:5601/app/kibana#/dev_tools/console
+## Open Travel Data (OPTD)
+* [Open Travel Data (OPTD)](https://github.com/opentraveldata/opentraveldata)
+  + [Travis CI for OPTD](https://travis-ci.org/github/opentraveldata/opentraveldata)
+* [OPTD - Quality Assurance (QA)](https://github.com/opentraveldata/quality-assurance)
+  + [Travis CI for OPTD QA](https://travis-ci.com/github/opentraveldata/quality-assurance)
 
 # Configuration
 
+## SSH tunnel to remote ES server
+
+
+```bash
+$ ssh root@tiproxy8 -f -L9400:10.30.2.191:9200 sleep 5; curl -XGET "http://localhost:9400/"|jq
+```
+
+## Kibana
 * Setup Kibana to disallow the read-only mode:
 ```bash
 $ curl -XPUT "http://localhost:9200/.kibana/_settings" -H "Content-Type: application/json" --data "@elasticseearch/settings/kibana-read-only.json"|jq
