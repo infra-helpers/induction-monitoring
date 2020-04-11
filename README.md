@@ -1,7 +1,7 @@
 Induction to Monitoring - ElasticSearch (ES) for Open Travel Data (OPTD) QA
 ===========================================================================
 
-![Photo by Will van Wingerden on Unsplash](https://github.com/infra-helpers/induction-monitoring/tree/master/img/will-van-wingerden-cZVthlrnlnQ-unsplash.jpg)
+<img src="https://github.com/infra-helpers/induction-monitoring/tree/master/img/will-van-wingerden-cZVthlrnlnQ-unsplash.jpg" alt="Photo by Will van Wingerden on Unsplash" width="200"/>
 
 # Overview
 [That repository](https://github.com/infra-helpers/induction-monitoring)
