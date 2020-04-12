@@ -98,11 +98,59 @@ cluster.
 
 # Configuration
 
-## SSH tunnel to remote ES server
+## Interact with the ES server through the command-line (CLI)
+* Interact with the local ES installation:
+```bash
+$ curl -XGET "http://localhost:9200/"|jq
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   542  100   542    0     0   1460      0 --:--:-- --:--:-- --:--:--  1456
+```
+```javascript
+{
+  "name": "D-A-MBPro",
+  "cluster_name": "elasticsearch_darnaud",
+  "cluster_uuid": "G7YM0RZsRtW3DjoM0sIx_A",
+  "version": {
+    "number": "7.6.2",
+    "build_flavor": "default",
+    "build_type": "tar",
+    "build_hash": "ef48eb35cf30adf4db14086e8aabd07ef6fb113f",
+    "build_date": "2020-03-26T06:34:37.794943Z",
+    "build_snapshot": false,
+    "lucene_version": "8.4.0",
+    "minimum_wire_compatibility_version": "6.8.0",
+    "minimum_index_compatibility_version": "6.0.0-beta1"
+  },
+  "tagline": "You Know, for Search"
+}
+```
 
-
+* Interact with the remote ES cluster through the SSH tunnel:
 ```bash
 $ ssh root@tiproxy8 -f -L9400:10.30.2.191:9200 sleep 5; curl -XGET "http://localhost:9400/"|jq
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   533  100   533    0     0    164      0  0:00:03  0:00:03 --:--:--   164
+```
+```javascript
+{
+  "name": "node-1",
+  "cluster_name": "titsc-escluster",
+  "cluster_uuid": "29nOWLHZRMOQWfkOjEWLcA",
+  "version": {
+    "number": "7.6.2",
+    "build_flavor": "default",
+    "build_type": "rpm",
+    "build_hash": "ef48eb35cf30adf4db14086e8aabd07ef6fb113f",
+    "build_date": "2020-03-26T06:34:37.794943Z",
+    "build_snapshot": false,
+    "lucene_version": "8.4.0",
+    "minimum_wire_compatibility_version": "6.8.0",
+    "minimum_index_compatibility_version": "6.0.0-beta1"
+  },
+  "tagline": "You Know, for Search"
+}
 ```
 
 ## Kibana
@@ -112,13 +160,30 @@ $ curl -XPUT "http://localhost:9200/.kibana/_settings" -H "Content-Type: applica
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
 100    89  100    21  100    68    265    860 --:--:-- --:--:-- --:--:--  1126
+```
+```javascript
 {
   "acknowledged": true
 }
+```
+```bash
+$ ssh root@tiproxy8 -f -L9400:10.30.2.191:9200 sleep 5; curl -XPUT "http://localhost:9400/.kibana/_settings" -H "Content-Type: application/json" --data "@elasticseearch/settings/kibana-read-only.json"|jq
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100    89  100    21  100    68      2      8  0:00:10  0:00:07  0:00:03     5
+```
+```javascript
+{
+  "acknowledged": true
+}
+```
+```bash
 $ curl -XPUT "http://localhost:9200/subway_info_v1/_settings" -H "Content-Type: application/json" --data "@elasticseearch/settings/kibana-read-only.json"|jq
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
 100    89  100    21  100    68    106    345 --:--:-- --:--:-- --:--:--   451
+```
+```javascript
 {
   "acknowledged": true
 }
@@ -130,6 +195,8 @@ $ curl -XGET "http://localhost:9200/.kibana/_settings"|jq
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
 100   304  100   304    0     0  13217      0 --:--:-- --:--:-- --:--:-- 13217
+```
+```javascript
 {
   ".kibana_1": {
     "settings": {
@@ -151,10 +218,43 @@ $ curl -XGET "http://localhost:9200/.kibana/_settings"|jq
     }
   }
 }
+```
+```bash
+$ ssh root@tiproxy8 -f -L9400:10.30.2.191:9200 sleep 5; curl -XGET "http://localhost:9400/.kibana/_settings"|jq
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   304  100   304    0     0     88      0  0:00:03  0:00:03 --:--:--    88
+```
+```javascript
+{
+  ".kibana_2": {
+    "settings": {
+      "index": {
+        "number_of_shards": "1",
+        "auto_expand_replicas": "0-1",
+        "blocks": {
+          "read_only_allow_delete": "false"
+        },
+        "provided_name": ".kibana_2",
+        "creation_date": "1582373355876",
+        "number_of_replicas": "1",
+        "uuid": "V8uYoV1zDZmQo9Jzu5a-LQ",
+        "version": {
+          "created": "7060099",
+          "upgraded": "7060299"
+        }
+      }
+    }
+  }
+}
+```
+```bash
 $ curl -XGET "http://localhost:9200/subway_info_v1/_settings"|jq
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
 100   285  100   285    0     0  47500      0 --:--:-- --:--:-- --:--:-- 47500
+```
+```javascript
 {
   "subway_info_v1": {
     "settings": {
@@ -181,6 +281,8 @@ $ curl -XGET "http://localhost:9200/subway_info_v1/_settings"|jq
 * List the patterns of the Grok processor:
 ```bash
 $ curl -XGET "http://localhost:9200/_ingest/processor/grok/" |jq
+```
+```javascript
 {
   "patterns": {
     "BACULA_CAPACITY": "%{INT}{1,3}(,%{INT}{3})*",
@@ -198,7 +300,8 @@ $ curl -XGET "http://localhost:9200/_ingest/processor/grok/" |jq
 ```
 
 * There is a Grok processing simulator in the Kibana DevTool console:
-  http://localhost:5601/app/kibana#/dev_tools/grokdebugger
+  + Local installation: http://localhost:5601/app/kibana#/dev_tools/grokdebugger
+  + Remote cluster: https://kibana.example.com/app/kibana#/dev_tools/grokdebugger
   + Sample data:
 ```csv
 BMT,4 Avenue,25th St,40.660397,-73.998091,R,,,,,,,,,,,Stair,YES,,YES,NONE,,FALSE,,FALSE,4th Ave,25th St,SW,40.660489,-73.99822
@@ -212,7 +315,6 @@ BMT,4 Avenue,25th St,40.660397,-73.998091,R,,,,,,,,,,,Stair,YES,,YES,NONE,,FALSE
 # Build a CSV to JSON pipeline
 
 ## School data
-
 * Create the `school` index:
 ```bash
 $ curl -XPUT "http://localhost:9200/school"
@@ -391,6 +493,16 @@ $ curl -XPUT "http://localhost:9200/subway_info_v1" -H "Content-Type: applicatio
   "index": "subway_info_v1"
 }
 ```
+```bash
+$ ssh root@tiproxy8 -f -L9400:10.30.2.191:9200 sleep 5; curl -XPUT "http://localhost:9400/subway_info_v1" -H "Content-Type: application/json" --data "@elasticseearch/data/NYC_Index.json" | jq
+```
+```javascript
+{
+  "acknowledged": true,
+  "shards_acknowledged": true,
+  "index": "subway_info_v1"
+}
+```
 
 * Check the index:
   + In the Kibana console: http://localhost:5601/app/kibana#/management/elasticsearch/index_management/indices
@@ -474,12 +586,24 @@ $ curl -XGET "http://localhost:9200/subway_info_v1" | jq
     }
   }
 }
+```bash
+$ ssh root@tiproxy8 -f -L9400:10.30.2.191:9200 sleep 5; curl -XGET "http://localhost:9400/subway_info_v1" | jq
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   756  100   756    0     0  54000      0 --:--:-- --:--:-- --:--:-- 54000
+```
+```javascript
+{
+  "subway_info_v1": {
+    ...
+  }
+}
 ```
 
-* On single-node installations (e.g., on a laptop), the health sttatus
+* On single-node installations (_e.g._, on a laptop), the health sttatus
   of the index will appear as yellow, as the number of replicas is set
   by default to 1, which cannot be satisfied with a single node.
-  The solution is to edit the settings of the index (_e.g._, frm the
+  The solution is to edit the settings of the index (_e.g._, from the
   [Kibana console](http://localhost:5601/app/kibana#/management/elasticsearch/index_management/indices))
   and set the `number_of_replicas` field to 0.
 ```bash
@@ -490,6 +614,15 @@ $ curl -XGET "http://localhost:9200/subway_info_v1/_settings/" | jq '.subway_inf
 ```
 ```javascript
 "0"
+```
+```bash
+$ ssh root@tiproxy8 -f -L9400:10.30.2.191:9200 sleep 5; curl -XGET "http://localhost:9400/subway_info_v1/_settings/" | jq '.subway_info_v1.settings.index.number_of_replicas'
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   220  100   220    0     0   9565      0 --:--:-- --:--:-- --:--:--  9565
+```
+```javascript
+"1"
 ```
 
 * Simulate the targetted pipeline:
@@ -541,11 +674,26 @@ $ curl -XPOST "http://localhost:9200/_ingest/pipeline/_simulate" -H "Content-Typ
   ]
 }
 ```
+```bash
+$ ssh root@tiproxy8 -f -L9400:10.30.2.191:9200 sleep 5; curl -XPOST "http://localhost:9400/_ingest/pipeline/_simulate" -H "Content-Type: application/json" --data "@elasticseearch/data/NYC_Grok_Processor.json"|jq
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100  1558  100   547  100  1011   2111   3903 --:--:-- --:--:-- --:--:--  6015
+```
+```javascript
+{
+  ...
+}
+```
 
 * Create the index template:
 ```bash
 $ curl -XPUT "http://localhost:9200/_template/nyc_template" -H "Content-Type: application/json" --data "@elasticseearch/data/NYC_Template.json"|jq
-{"acknowledged":true}
+```
+```javascript
+{
+  "acknowledged": true
+}
 ```
 
 * Check the index template in the Kibana console:
