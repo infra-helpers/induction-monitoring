@@ -1,7 +1,7 @@
 ElasticSearch (ES) Cluster Setup on Proxmox LXC Containers
 ==========================================================
 
-[![Beige, yellow, and blue loom bands, by Michael Walter on Unsplash](https://github.com/infra-helpers/induction-monitoring/tree/master/img/michael-walter-12fspxQ387g-unsplash.jpg)](https://unsplash.com/photos/12fspxQ387g)
+[![Beige, yellow, and blue loom bands, by Michael Walter on Unsplash](/img/michael-walter-12fspxQ387g-unsplash.jpg)](https://unsplash.com/photos/12fspxQ387g)
 
 # Overview
 That
