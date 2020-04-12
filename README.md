@@ -1,7 +1,8 @@
 Induction to Monitoring - ElasticSearch (ES) for Open Travel Data (OPTD) QA
 ===========================================================================
 
-<img src="https://github.com/infra-helpers/induction-monitoring/tree/master/img/will-van-wingerden-cZVthlrnlnQ-unsplash.jpg" alt="Photo by Will van Wingerden on Unsplash" width="200"/>
+
+[![Person on top of the cliff, by Will van Wingerden on Unsplash](img/will-van-wingerden-cZVthlrnlnQ-unsplash.jpg)](https://unsplash.com/photos/cZVthlrnlnQ)
 
 # Overview
 [That repository](https://github.com/infra-helpers/induction-monitoring)
@@ -21,8 +22,7 @@ of the [Open Travel Data (OPTD)
 project](https://github.com/opentraveldata/opentraveldata).
 
 The full details on how to setup an ES cluster on Proxmox LXC containers
-are given in the [dedicated `elasticsearch`
-sub-folder](https://github.com/infra-helpers/induction-monitoring/tree/master/elasticseearch/).
+are given in the [dedicated `elasticsearch/` sub-folder](elasticseearch/).
 Such an ES cluster is actually the publishing target of the
 [Quality Assurance (QA)](https://github.com/opentraveldata/quality-assurance)
 events of the [Open Travel Data (OPTD)
