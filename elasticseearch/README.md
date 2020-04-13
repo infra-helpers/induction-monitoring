@@ -81,8 +81,10 @@ adapted according to your configuration:
 | VM ID | Private IP  |  Host name (full)   | Short name  |
 | ----- | ----------- | ------------------- | ----------- |
 |  104  | 10.30.2.4   | proxy8.example.com  | proxy8      |
-|  191  | 10.30.2.191 | es-in1.example.com  | etcd1       |
-|  192  | 10.30.2.192 | es-in2.example.com  | etcd2       |
+|  191  | 10.30.2.191 | es-in1.example.com  | es-int1     |
+|  192  | 10.30.2.192 | es-in2.example.com  | es-int2     |
+|  194  | 10.30.2.194 | kfk-in1.example.com | kfk-int1    |
+|  195  | 10.30.2.195 | kfk-in2.example.com | kfk-int2    |
 
 * Extract of the host network configuration:
 ```bash
@@ -319,6 +321,7 @@ root@proxmox:~$ pct enter 104
 [root@proxy8]# hostnamectl set-hostname proxy8.example.com
 [root@proxy8]# dnf -y install htop less screen bzip2 dos2unix man man-pages
 [root@proxy8]# dnf -y install sudo whois ftp rsync vim git-all patch mutt
+[root@proxy8]# dnf -y install java-11-openjdk-headless
 [root@proxy8]# dnf -y install nginx python3-pip
 [root@proxy8]# pip-3 install certbot-nginx
 [root@proxy8]# rpmconf -a
@@ -695,7 +698,7 @@ Kibana server is not ready yet
   (login with `<kibana-user>` and the password which have been setup above
   with the `htpasswd -c` command)
 
-# Access to ES from outside through proxy8 with SSH
+## Access to ES from outside through proxy8 with SSH
 * From Travis CI:
 ```bash
 build@travis-ci$ ssh root@tiproxy8 -f -L9400:10.30.2.191:9200 sleep 5; curl -XGET "http://localhost:9400/"|jq
@@ -719,5 +722,350 @@ build@travis-ci$ ssh root@tiproxy8 -f -L9400:10.30.2.191:9200 sleep 5; curl -XGE
   },
   "tagline": "You Know, for Search"
 }
+```
+
+# Kafka
+* References:
+  + https://docs.confluent.io/current/quickstart/index.html
+    - https://docs.confluent.io/current/installation/installing_cp/rhel-centos.html#systemd-rhel-centos-install
+    - https://tecadmin.net/install-apache-kafka-centos-8/
+  + https://linux.jadoel.info/
+  + Kafka releases: https://downloads.apache.org/kafka/
+
+* Add two `A` records in the
+  [`example.com` domain](https://www.ovh.com/manager/web/index.html#/configuration/domain/example.com?tab=ZONE):
+  + New record: `kfk-int1.example.com`
+  + Target: `10.30.2.194`
+  + New record: `kfk-int2.example.com`
+  + Target: `10.30.2.195`
+  + New record: `kafka.example.com`
+  + Target: `GTW_IP` (public IP of `proxy8`, needed for SSL)
+
+* Create the container for node 1:
+```bash
+root@proxmox:~$ pct create 194 local:vztmpl/centos-8-default_20191016_amd64.tar.xz --arch amd64 --cores 2 --hostname kfk-int1.example.com --memory 16134 --swap 32268 --net0 name=eth0,bridge=vmbr2,gw=10.30.2.2,ip=10.30.2.194/24,type=veth --onboot 1 --ostype centos
+root@proxmox:~$ pct resize 194 rootfs 50G
+root@proxmox:~$ ls -laFh /var/lib/vz/images/194/vm-194-disk-0.raw
+-rw-r----- 1 root root 50G Apr 13 14:42 /var/lib/vz/images/194/vm-194-disk-0.raw
+root@proxmox:~$ cat /etc/pve/lxc/194.conf
+arch: amd64
+cores: 2
+hostname: kfk-int1.example.com
+memory: 16134
+net0: name=eth0,bridge=vmbr2,gw=10.30.2.2,hwaddr=DA:4C:AB:06:0F:2A,ip=10.30.2.194/24,type=veth
+onboot: 1
+ostype: centos
+rootfs: local:194/vm-194-disk-0.raw,size=50G
+swap: 32268
+```
+
+* Create the container for node 2:
+```bash
+root@proxmox:~$ pct create 195 local:vztmpl/centos-8-default_20191016_amd64.tar.xz --arch amd64 --cores 2 --hostname kfk-int2.example.com --memory 16134 --swap 32268 --net0 name=eth0,bridge=vmbr2,gw=10.30.2.2,ip=10.30.2.195/24,type=veth --onboot 1 --ostype centos
+root@proxmox:~$ pct resize 195 rootfs 50G
+root@proxmox:~$ ls -laFh /var/lib/vz/images/195/vm-195-disk-0.raw
+-rw-r----- 1 root root 50G Apr 13 14:44 /var/lib/vz/images/195/vm-195-disk-0.raw
+root@proxmox:~$ cat /etc/pve/lxc/195.conf
+arch: amd64
+cores: 2
+hostname: kfk-int2.example.com
+memory: 16134
+net0: name=eth0,bridge=vmbr2,gw=10.30.2.2,hwaddr=0A:75:1B:03:A5:39,ip=10.30.2.195/24,type=veth
+onboot: 1
+ostype: centos
+rootfs: local:195/vm-195-disk-0.raw,size=50G
+swap: 32268
+```
+
+* Manual setup of the network for node 1:
+```bash
+root@proxmox:~$ pct start 194 && pct enter 194
+[root@kfk-int1]# mkdir ~/bin && cat > ~/bin/netup.sh << _EOF
+#!/bin/sh
+
+ip addr add 10.30.2.194/24 dev eth0
+ip link set eth0 up
+ip route add default via 10.30.2.2 dev eth0
+
+_EOF
+[root@kfk-int1]# chmod 755 ~/bin/netup.sh
+[root@kfk-int1]# ~/bin/netup.sh
+[root@kfk-int1]# dnf -y upgrade
+[root@kfk-int1]# dnf -y install epel-release
+[root@kfk-int1]# dnf -y install NetworkManager-tui
+[root@kfk-int1]# systemctl start NetworkManager.service && systemctl status NetworkManager.service && systemctl enable NetworkManager.service
+[root@kfk-int1]# nmcli con # to check the name of the connection
+[root@kfk-int1]# nmcli con up "System eth0"
+[root@kfk-int1]# exit
+```
+
+* Manual setup of the network for node 2:
+```bash
+root@proxmox:~$ pct start 195 && pct enter 195
+[root@kfk-int2]# mkdir ~/bin && cat > ~/bin/netup.sh << _EOF
+#!/bin/sh
+
+ip addr add 10.30.2.195/24 dev eth0
+ip link set eth0 up
+ip route add default via 10.30.2.2 dev eth0
+
+_EOF
+[root@kfk-int2]# chmod 755 ~/bin/netup.sh
+[root@kfk-int2]# ~/bin/netup.sh
+[root@kfk-int2]# dnf -y upgrade
+[root@kfk-int2]# dnf -y install epel-release
+[root@kfk-int2]# dnf -y install NetworkManager-tui
+[root@kfk-int2]# systemctl start NetworkManager.service && systemctl status NetworkManager.service && systemctl enable NetworkManager.service
+[root@kfk-int2]# nmcli con # to check the name of the connection
+[root@kfk-int2]# nmcli con up "System eth0"
+[root@kfk-int2]# exit
+```
+
+* Complement the installation of node 1:
+```bash
+root@proxmox:~$ pct enter 194
+[root@kfk-int1]# dnf -y install hostname rpmconf dnf-utils wget curl net-tools tar
+[root@kfk-int1]# hostnamectl set-hostname kfk-int1.example.com
+[root@kfk-int1]# dnf -y install htop less screen bzip2 dos2unix man man-pages
+[root@kfk-int1]# dnf -y install sudo whois ftp rsync vim git-all patch mutt
+[root@kfk-int1]# dnf -y install nginx python3-pip
+[root@kfk-int1]# rpmconf -a
+[root@kfk-int1]# ln -sf /usr/share/zoneinfo/Europe/Paris /etc/localtime
+[root@kfk-int1]# setenforce 0
+[root@kfk-int1]# dnf -y install openssh-server
+[root@kfk-int1]# systemctl start sshd.service && systemctl status sshd.service && systemctl enable sshd.service
+[root@kfk-int1]# mkdir ~/.ssh && chmod 700 ~/.ssh
+[root@kfk-int1]# cat > ~/.ssh/authorized_keys << _EOF
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCeiMpaINdFvswOkq1zahnslmh6E1RjyvgVfbiTbFPwjEE+7WmCeD2fo7QekXiP0PTDZh8pN5Xs2v067L6/tzL8KTH4aY6GDD6H71LZa5jYFGA8fmgv7y0eeAhar/Cn331LolWdkR3qBkf+nvN6WrsA8XxYhK9mdUtG0h6bZtJZEnEYejvg/AuXJGMjMDpMq+iYnMaw0NHyDmag3VmQiXTLbqmQKw/p14qtBYR3fhgESnXnXImZGogo9GUhiRsaimiEiM/zBunnL8Do0dlLqDQYQmhlm08TFosuO8kSz8nQVXnuakmH0ePYNnST3WYwx0Ii0xuip29jO+8vDrXAHIrV denis.arnaud_fas2017@m4x.org
+_EOF
+[root@kfk-int1]# chmod 600 ~/.ssh/authorized_keys
+[root@kfk-int1]# passwd -d root
+[root@kfk-int1]# rpm --import http://wiki.psychotic.ninja/RPM-GPG-KEY-psychotic
+[root@kfk-int1]# rpm -ivh http://packages.psychotic.ninja/7/base/x86_64/RPMS/keychain-2.8.0-3.el7.psychotic.noarch.rpm
+[root@kfk-int1]# cat > ~/.screenrc << _EOF
+hardstatus alwayslastline "%{.kW}%-w%{.B}%n %t%{-}%{=b kw}%?%+w%? %=%c %d/%m/%Y" #B&W & date&time
+startup_message off
+defscrollback 1024
+_EOF
+[root@kfk-int1]# exit
+```
+
+* Complement the installation of node 2:
+```bash
+root@proxmox:~$ pct enter 195
+[root@kfk-int2]# dnf -y install hostname rpmconf dnf-utils wget curl net-tools tar
+[root@kfk-int2]# hostnamectl set-hostname kfk-int2.example.com
+[root@kfk-int2]# dnf -y install htop less screen bzip2 dos2unix man man-pages
+[root@kfk-int2]# dnf -y install sudo whois ftp rsync vim git-all patch mutt
+[root@kfk-int2]# dnf -y install nginx python3-pip
+[root@kfk-int2]# rpmconf -a
+[root@kfk-int2]# ln -sf /usr/share/zoneinfo/Europe/Paris /etc/localtime
+[root@kfk-int2]# setenforce 0
+[root@kfk-int2]# dnf -y install openssh-server
+[root@kfk-int2]# systemctl start sshd.service && systemctl status sshd.service && systemctl enable sshd.service
+[root@kfk-int2]# mkdir ~/.ssh && chmod 700 ~/.ssh
+[root@kfk-int2]# cat > ~/.ssh/authorized_keys << _EOF
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCeiMpaINdFvswOkq1zahnslmh6E1RjyvgVfbiTbFPwjEE+7WmCeD2fo7QekXiP0PTDZh8pN5Xs2v067L6/tzL8KTH4aY6GDD6H71LZa5jYFGA8fmgv7y0eeAhar/Cn331LolWdkR3qBkf+nvN6WrsA8XxYhK9mdUtG0h6bZtJZEnEYejvg/AuXJGMjMDpMq+iYnMaw0NHyDmag3VmQiXTLbqmQKw/p14qtBYR3fhgESnXnXImZGogo9GUhiRsaimiEiM/zBunnL8Do0dlLqDQYQmhlm08TFosuO8kSz8nQVXnuakmH0ePYNnST3WYwx0Ii0xuip29jO+8vDrXAHIrV denis.arnaud_fas2017@m4x.org
+_EOF
+[root@kfk-int2]# chmod 600 ~/.ssh/authorized_keys
+[root@kfk-int2]# passwd -d root
+[root@kfk-int2]# rpm --import http://wiki.psychotic.ninja/RPM-GPG-KEY-psychotic
+[root@kfk-int2]# rpm -ivh http://packages.psychotic.ninja/7/base/x86_64/RPMS/keychain-2.8.0-3.el7.psychotic.noarch.rpm
+[root@kfk-int2]# cat > ~/.screenrc << _EOF
+hardstatus alwayslastline "%{.kW}%-w%{.B}%n %t%{-}%{=b kw}%?%+w%? %=%c %d/%m/%Y" #B&W & date&time
+startup_message off
+defscrollback 1024
+_EOF
+[root@kfk-int2]# exit
+```
+
+* Add an entry on the SSH client:
+```bash
+user@laptop$ cat >> ~/.ssh/config << _EOF
+
+# Kafka
+Host tikfk1
+  HostName kfk-int1.example.com
+  ProxyCommand ssh -W %h:22 root@tiproxy8
+  ForwardAgent yes
+Host tikfk2
+  HostName kfk-int2.example.com
+  ProxyCommand ssh -W %h:22 root@tiproxy8
+  ForwardAgent yes
+
+_EOF
+```
+
+## Kafka specificities
+The following tasks have to be performed on every node.
+
+Zookeeper is bundled with the Kafka tar-ball.
+
+* Install Java:
+```bash
+root@proxmox:~$ pct enter 194 # pct enter 195
+[root@kfk-intN]# dnf -y install java-11-openjdk-headless
+```
+
+* Download and extract the Kafka tar-ball:
+```bash
+[root@kfk-intN]# mkdir -p /opt/kafka/archives && cd /opt/kafka
+[root@kfk-intN]# wget https://downloads.apache.org/kafka/2.4.1/kafka_2.13-2.4.1.tgz
+[root@kfk-intN]# tar zxf kafka_2.13-2.4.1.tgz && mv kafka_2.13-2.4.1.tgz archives/
+[root@kfk-intN]# mv kafka_2.13-2.4.1 /usr/local && cd /usr/local && ln -s kafka_2.13-2.4.1 kafka
+```
+
+* Setup Zookeeper:
+```bash
+[root@kfk-intN]# mkdir -p /usr/share/zookeeper/data
+[root@kfk-intN]# sed -i -e 's|dataDir=/tmp/zookeeper|dataDir=/usr/share/zookeeper/data|g' /usr/local/kafka/config/zookeeper.properties
+[root@kfk-intN]# sed -i -e 's|maxClientCnxns=0|maxClientCnxns=10|g' /usr/local/kafka/config/zookeeper.properties
+```
+
+* Setup `systemd` for Zookeeper:
+```bash
+[root@kfk-intN]# cat > /etc/systemd/system/zookeeper.service << _EOF
+[Unit]
+Description=Apache Zookeeper server
+Documentation=http://zookeeper.apache.org
+Requires=network.target remote-fs.target
+After=network.target remote-fs.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/kafka/bin/zookeeper-server-start.sh /usr/local/kafka/config/zookeeper.properties
+ExecStop=/usr/local/kafka/bin/zookeeper-server-stop.sh
+Restart=on-abnormal
+
+[Install]
+WantedBy=multi-user.target
+_EOF
+```
+
+* Test that Zookeeper is working:
+```bash
+[root@kfk-intN]# zookeeper-shell.sh 10.30.2.194:2181 ls /brokers/ids
+Connecting to 10.30.2.194:2181
+
+WATCHER::
+
+WatchedEvent state:SyncConnected type:None path:null
+Node does not exist: /brokers/ids
+```
+
+* Setup Kafka:
+```bash
+[root@kfk-intN]# mkdir -p /usr/share/kafka/data /var/log/kafka
+[root@kfk-intN]# sed -i -e 's|broker.id=0|broker.id=N|g' /usr/local/kafka/config/server.properties
+[root@kfk-intN]# sed -i -e 's|log.dirs=/tmp/kafka-logs|log.dirs=/var/log/kafka|g' /usr/local/kafka/config/server.properties
+[root@kfk-intN]# sed -i -e 's|offsets.topic.replication.factor=1|offsets.topic.replication.factor=2|g' /usr/local/kafka/config/server.properties
+[root@kfk-intN]# sed -i -e 's|transaction.state.log.replication.factor=1|transaction.state.log.replication.factor=2|g' /usr/local/kafka/config/server.properties
+[root@kfk-intN]# sed -i -e 's|zookeeper.connect=localhost:2181|zookeeper.connect=10.30.2.194:2181|g' /usr/local/kafka/config/server.properties
+```
+
+* Setup `systemd` for Kafka:
+```bash
+[root@kfk-intN]# cat > /etc/systemd/system/kafka.service << _EOF
+[Unit]
+Description=Apache Kafka Server
+Documentation=http://kafka.apache.org/documentation.html
+Requires=zookeeper.service
+
+[Service]
+Type=simple
+Environment="JAVA_HOME=/usr/lib/jvm/jre-11-openjdk"
+ExecStart=/usr/local/kafka/bin/kafka-server-start.sh /usr/local/kafka/config/server.properties
+ExecStop=/usr/local/kafka/bin/kafka-server-stop.sh
+
+[Install]
+WantedBy=multi-user.target
+_EOF
+[root@kfk-intN]# systemctl daemon-reload
+[root@kfk-intN]# systemctl start zookeeper && systemctl status zookeeper && systemctl enable zookeeper
+[root@kfk-intN]# systemctl start kafka && systemctl status kafka && systemctl enable kafka
+```
+
+* Add Kafka to the `PATH`:
+```bash
+[root@kfk-intN]# cat >> ~/.bashrc << _EOF
+
+# Kafka
+KAFKA_HOME="/usr/local/kafka"
+export PATH="\${PATH}:\${KAFKA_HOME}/bin"
+
+_EOF
+[root@kfk-intN]# . ~/.bashrc
+```
+
+* Check that the setup is up und running with two nodes. From any node:
+```bash
+[root@kfk-intN]# zookeeper-shell.sh 10.30.2.194:2181 ls /brokers/ids
+Connecting to 10.30.2.194:2181
+
+WATCHER::
+
+WatchedEvent state:SyncConnected type:None path:null
+[1, 2]
+```
+
+* Create a `test` topic and check that it is there:
+```bash
+[root@kfk-intN]# kafka-topics.sh --create --zookeeper 10.30.2.194:2181 --replication-factor 2 --partitions 2 --topic test
+Created topic test.
+[root@kfk-intN]# kafka-topics.sh --list --zookeeper 10.30.2.194:2181 
+test
+```
+
+* Send a few messages onto the `test` topic. From any node:
+```bash
+[root@kfk-intN]# kafka-console-producer.sh --broker-list 10.30.2.194:9092 --topic test
+>Hello World!
+>A second line
+>^C
+```
+
+* Check that the messages are in the queue. From any node:
+```bash
+[root@kfk-intN]# kafka-console-consumer.sh --bootstrap-server 10.30.2.195:9092 --topic test --from-beginning
+Hello World!
+A second line
+^CProcessed a total of 2 messages
+```
+
+## Access to Kafka and Zookeeper through proxy8 with SSH
+* From Travis CI, list the Kafka node brokers:
+```bash
+build@travis-ci$ ssh root@tiproxy8 zookeeper-shell.sh 10.30.2.194:2181 ls /brokers/ids
+Connecting to 10.30.2.194:2181
+
+WATCHER::
+
+WatchedEvent state:SyncConnected type:None path:null
+[1, 2]
+```
+
+* From Travis CI, list the Kafka topics:
+```bash
+build@travis-ci$ ssh root@tiproxy8 kafka-topics.sh --list --zookeeper 10.30.2.194:2181
+__consumer_offsets
+test
+```
+
+* From Travis CI, send messages:
+```bash
+build@travis-ci$ ssh root@tiproxy8 kafka-console-producer.sh --broker-list 10.30.2.194:9092 --topic test
+>Hello World, second test!
+>From remote!
+>^C
+```
+
+* From Travis CI, check the messages:
+```bash
+build@travis-ci$ ssh root@tiproxy8 kafka-console-consumer.sh --bootstrap-server 10.30.2.195:9092 --topic test --from-beginning
+A second line
+From remote!
+Hello World!
+Hello World, second test!
+^C
 ```
 
