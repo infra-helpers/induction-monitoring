@@ -727,8 +727,9 @@ build@travis-ci$ ssh root@tiproxy8 -f -L9400:10.30.2.191:9200 sleep 5; curl -XGE
 # Kafka
 * References:
   + https://docs.confluent.io/current/quickstart/index.html
-    - https://docs.confluent.io/current/installation/installing_cp/rhel-centos.html#systemd-rhel-centos-install
-    - https://tecadmin.net/install-apache-kafka-centos-8/
+  + https://docs.confluent.io/current/quickstart/cos-quickstart.html#cos-quickstart
+    - Confluent way (recommended): https://docs.confluent.io/current/installation/installing_cp/rhel-centos.html#systemd-rhel-centos-install
+    - Manual way: https://tecadmin.net/install-apache-kafka-centos-8/
   + https://linux.jadoel.info/
   + Kafka releases: https://downloads.apache.org/kafka/
 
@@ -741,6 +742,20 @@ build@travis-ci$ ssh root@tiproxy8 -f -L9400:10.30.2.191:9200 sleep 5; curl -XGE
   + New record: `kafka.example.com`
   + Target: `GTW_IP` (public IP of `proxy8`, needed for SSL)
 
+## Overview
+A Kafka cluster is made of so-called broker nodes coordinated by Zookeeper.
+Zookeeper may be a cluster itself, which has to contain an odd number of nodes
+(in order that a leader can always be elected). As the infrastructure is
+expected to be used just for small data and traffic, it will be fine
+to have Zookeeper be made of a single node cluster.
+
+The Kafka cluster will be made of two broker nodes, as to allow for some
+replication.
+
+Kafka releases are depending on the Scala version. It is relevant only
+for the Scala-based bindings.
+
+## Setup of the containers
 * Create the container for node 1:
 ```bash
 root@proxmox:~$ pct create 194 local:vztmpl/centos-8-default_20191016_amd64.tar.xz --arch amd64 --cores 2 --hostname kfk-int1.example.com --memory 16134 --swap 32268 --net0 name=eth0,bridge=vmbr2,gw=10.30.2.2,ip=10.30.2.194/24,type=veth --onboot 1 --ostype centos
@@ -824,7 +839,7 @@ _EOF
 * Complement the installation of node 1:
 ```bash
 root@proxmox:~$ pct enter 194
-[root@kfk-int1]# dnf -y install hostname rpmconf dnf-utils wget curl net-tools tar
+[root@kfk-int1]# dnf -y install hostname rpmconf dnf-utils wget curl net-tools tar which
 [root@kfk-int1]# hostnamectl set-hostname kfk-int1.example.com
 [root@kfk-int1]# dnf -y install htop less screen bzip2 dos2unix man man-pages
 [root@kfk-int1]# dnf -y install sudo whois ftp rsync vim git-all patch mutt
@@ -853,7 +868,7 @@ _EOF
 * Complement the installation of node 2:
 ```bash
 root@proxmox:~$ pct enter 195
-[root@kfk-int2]# dnf -y install hostname rpmconf dnf-utils wget curl net-tools tar
+[root@kfk-int2]# dnf -y install hostname rpmconf dnf-utils wget curl net-tools tar which
 [root@kfk-int2]# hostnamectl set-hostname kfk-int2.example.com
 [root@kfk-int2]# dnf -y install htop less screen bzip2 dos2unix man man-pages
 [root@kfk-int2]# dnf -y install sudo whois ftp rsync vim git-all patch mutt
@@ -907,39 +922,49 @@ root@proxmox:~$ pct enter 194 # pct enter 195
 [root@kfk-intN]# dnf -y install java-11-openjdk-headless
 ```
 
-* Download and extract the Kafka tar-ball:
+* Install the Yum/DNF repository for Confluent, and the Confluent Platform:
 ```bash
-[root@kfk-intN]# mkdir -p /opt/kafka/archives && cd /opt/kafka
-[root@kfk-intN]# wget https://downloads.apache.org/kafka/2.4.1/kafka_2.13-2.4.1.tgz
-[root@kfk-intN]# tar zxf kafka_2.13-2.4.1.tgz && mv kafka_2.13-2.4.1.tgz archives/
-[root@kfk-intN]# mv kafka_2.13-2.4.1 /usr/local && cd /usr/local && ln -s kafka_2.13-2.4.1 kafka
-```
+[root@kfk-intN]# rpm --import https://packages.confluent.io/rpm/5.4/archive.key
+[root@kfk-intN]# cat > /etc/yum.repos.d/confluent.repo << _EOF
+[Confluent.dist]
+name=Confluent repository (dist)
+baseurl=https://packages.confluent.io/rpm/5.4/7
+gpgcheck=1
+gpgkey=https://packages.confluent.io/rpm/5.4/archive.key
+enabled=1
 
-* Setup Zookeeper:
-```bash
-[root@kfk-intN]# mkdir -p /usr/share/zookeeper/data
-[root@kfk-intN]# sed -i -e 's|dataDir=/tmp/zookeeper|dataDir=/usr/share/zookeeper/data|g' /usr/local/kafka/config/zookeeper.properties
-[root@kfk-intN]# sed -i -e 's|maxClientCnxns=0|maxClientCnxns=10|g' /usr/local/kafka/config/zookeeper.properties
-```
-
-* Setup `systemd` for Zookeeper:
-```bash
-[root@kfk-intN]# cat > /etc/systemd/system/zookeeper.service << _EOF
-[Unit]
-Description=Apache Zookeeper server
-Documentation=http://zookeeper.apache.org
-Requires=network.target remote-fs.target
-After=network.target remote-fs.target
-
-[Service]
-Type=simple
-ExecStart=/usr/local/kafka/bin/zookeeper-server-start.sh /usr/local/kafka/config/zookeeper.properties
-ExecStop=/usr/local/kafka/bin/zookeeper-server-stop.sh
-Restart=on-abnormal
-
-[Install]
-WantedBy=multi-user.target
+[Confluent]
+name=Confluent repository
+baseurl=https://packages.confluent.io/rpm/5.4
+gpgcheck=1
+gpgkey=https://packages.confluent.io/rpm/5.4/archive.key
+enabled=1
 _EOF
+[root@kfk-intN]# dnf -y install confluent-community-2.12
+[root@kfk-intN]# chown cp-kafka:confluent /var/log/kafka \
+	&& chmod u+wx,g+r,o= /var/log/kafka \
+	&& chown cp-kafka:confluent /var/log/confluent \
+	&& chmod u+wx,g+wx,o= /var/log/confluent \
+	&& chown cp-kafka:confluent /var/lib/kafka \
+	&& chmod u+wx,g+r,o= /var/lib/kafka \
+	&& chown cp-kafka:confluent /var/lib/zookeeper \
+	&& chmod u+wx,g+r,o= /var/lib/zookeeper
+
+```
+
+* Setup Zookeeper on a single node. Zookeeper needs to be installed
+  on an odd number of nodes:
+```bash
+[root@kfk-int1]# cat >> /etc/kafka/zookeeper.properties << _EOF
+tickTime=2000
+clientPort=2181
+initLimit=5
+syncLimit=2
+server.1=10.30.2.194:2888:3888
+autopurge.snapRetainCount=3
+autopurge.purgeInterval=24
+_EOF
+[root@kfk-int1]# systemctl start confluent-zookeeper && systemctl status confluent-zookeeper && systemctl enable confluent-zookeeper
 ```
 
 * Test that Zookeeper is working:
@@ -953,48 +978,13 @@ WatchedEvent state:SyncConnected type:None path:null
 Node does not exist: /brokers/ids
 ```
 
-* Setup Kafka:
+* Setup Kafka on each node:
 ```bash
-[root@kfk-intN]# mkdir -p /usr/share/kafka/data /var/log/kafka
-[root@kfk-intN]# sed -i -e 's|broker.id=0|broker.id=N|g' /usr/local/kafka/config/server.properties
-[root@kfk-intN]# sed -i -e 's|log.dirs=/tmp/kafka-logs|log.dirs=/var/log/kafka|g' /usr/local/kafka/config/server.properties
-[root@kfk-intN]# sed -i -e 's|offsets.topic.replication.factor=1|offsets.topic.replication.factor=2|g' /usr/local/kafka/config/server.properties
-[root@kfk-intN]# sed -i -e 's|transaction.state.log.replication.factor=1|transaction.state.log.replication.factor=2|g' /usr/local/kafka/config/server.properties
-[root@kfk-intN]# sed -i -e 's|zookeeper.connect=localhost:2181|zookeeper.connect=10.30.2.194:2181|g' /usr/local/kafka/config/server.properties
-```
-
-* Setup `systemd` for Kafka:
-```bash
-[root@kfk-intN]# cat > /etc/systemd/system/kafka.service << _EOF
-[Unit]
-Description=Apache Kafka Server
-Documentation=http://kafka.apache.org/documentation.html
-Requires=zookeeper.service
-
-[Service]
-Type=simple
-Environment="JAVA_HOME=/usr/lib/jvm/jre-11-openjdk"
-ExecStart=/usr/local/kafka/bin/kafka-server-start.sh /usr/local/kafka/config/server.properties
-ExecStop=/usr/local/kafka/bin/kafka-server-stop.sh
-
-[Install]
-WantedBy=multi-user.target
-_EOF
-[root@kfk-intN]# systemctl daemon-reload
-[root@kfk-intN]# systemctl start zookeeper && systemctl status zookeeper && systemctl enable zookeeper
-[root@kfk-intN]# systemctl start kafka && systemctl status kafka && systemctl enable kafka
-```
-
-* Add Kafka to the `PATH`:
-```bash
-[root@kfk-intN]# cat >> ~/.bashrc << _EOF
-
-# Kafka
-KAFKA_HOME="/usr/local/kafka"
-export PATH="\${PATH}:\${KAFKA_HOME}/bin"
-
-_EOF
-[root@kfk-intN]# . ~/.bashrc
+[root@kfk-intN]# sed -i -e 's|broker.id=0|broker.id=N|g' /etc/kafka/server.properties
+[root@kfk-intN]# sed -i -e 's|offsets.topic.replication.factor=1|offsets.topic.replication.factor=2|g' /etc/kafka/server.properties
+[root@kfk-intN]# sed -i -e 's|transaction.state.log.replication.factor=1|transaction.state.log.replication.factor=2|g' /etc/kafka/server.properties
+[root@kfk-intN]# sed -i -e 's|zookeeper.connect=localhost:2181|zookeeper.connect=10.30.2.194:2181|g' /etc/kafka/server.properties
+[root@kfk-intN]# systemctl start confluent-kafka && systemctl status confluent-kafka && systemctl enable confluent-kafka
 ```
 
 * Check that the setup is up und running with two nodes. From any node:
@@ -1006,6 +996,28 @@ WATCHER::
 
 WatchedEvent state:SyncConnected type:None path:null
 [1, 2]
+```
+
+* Setup Kafka REST proxy and start it (configure Zookeeper):
+```bash
+[root@kfk-intN]# sed -e 's|#zookeeper.connect=localhost:2181|zookeeper.connect=10.30.2.194:2181|g' /etc/kafka-rest/kafka-rest.properties
+[root@kfk-intN]# systemctl start confluent-kafka-rest && systemctl status confluent-kafka-rest && systemctl enable confluent-kafka-rest
+```
+
+* Setup Kafka schema registry (configure Zookeeper):
+```bash
+[root@kfk-intN]# sed -i -e 's|kafkastore.connection.url=localhost:2181|kafkastore.connection.url=10.30.2.194:2181|g' /etc/schema-registry/schema-registry.properties
+```
+
+* Setup and start Kafka connect:
+```bash
+[root@kfk-intN]# systemctl start confluent-kafka-connect && systemctl status confluent-kafka-connect && systemctl enable confluent-kafka-connect
+```
+
+* Setup and start Kafka KSQL:
+```bash
+[root@kfk-intN]# mkdir -p /var/lib/kafka-streams && chown -R cp-ksql.confluent /var/lib/kafka-streams
+[root@kfk-intN]# systemctl start confluent-ksql && systemctl status confluent-ksql && systemctl enable confluent-ksql
 ```
 
 * Create a `test` topic and check that it is there:
