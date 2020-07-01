@@ -11,6 +11,7 @@ tox = "*"
 wheel = "*"
 build = "*"
 sphinx = "*"
+sphinx-rtd-theme = "*"
 setuptools = "*"
 pyjq = "*"
 flake8 = "*"
@@ -26,4 +27,3 @@ cryptography = "*"
 
 [requires]
 python_version = "3.8"
-

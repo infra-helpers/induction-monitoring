@@ -122,6 +122,27 @@ View at:
 https://pypi.org/project/datamonitor/0.0.0/
 ```
 
+* Note that the documentation is built automatically by ReadTheDocs (RTD)
+  + The documentation is available from
+    https://datamonitoring.readthedocs.io/en/latest/
+  + The RTD project is setup on https://readthedocs.org/projects/datamonitoring/
+
+* Build the documentation manually (with [Sphinx](http://sphinx-doc.org)):
+```bash
+$ pipenv run python setup.py build_sphinx
+running build_sphinx
+Running Sphinx v3.1.1
+loading pickled environment... done
+building [mo]: targets for 0 po files that are out of date
+building [html]: targets for 9 source files that are out of date
+updating environment: [new config] 9 added, 0 changed, 0 removed
+looking for now-outdated files... none found
+no targets are out of date.
+build succeeded.
+
+The HTML pages are in build/sphinx/html.
+```
+
 ## Test the OpenTREP Python extension
 * Enter into the `pipenv` Shell:
 ```bash
