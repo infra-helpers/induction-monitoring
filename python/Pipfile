@@ -1,0 +1,29 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+cookiecutter = "*"
+twine = "*"
+pytest = "*"
+tox = "*"
+wheel = "*"
+build = "*"
+sphinx = "*"
+setuptools = "*"
+pyjq = "*"
+flake8 = "*"
+
+[packages]
+elasticsearch = "*"
+datetime = "*"
+gunicorn = "*"
+apache-airflow = {extras = ["elasticserch"], version = "*"}
+psycopg2 = "*"
+typing-extensions = "*"
+cryptography = "*"
+
+[requires]
+python_version = "3.8"
+
