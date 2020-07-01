@@ -2,14 +2,49 @@ Induction to Monitoring - Python
 ================================
 
 # Table of Content (ToC)
+- [Induction to Monitoring - Python](#induction-to-monitoring---python)
+- [Table of Content (ToC)](#table-of-content--toc-)
+- [Overview](#overview)
+- [References](#references)
+  * [Python module](#python-module)
+  * [Python virtual environments](#python-virtual-environments)
+- [Installation](#installation)
+  * [Clone this Git repository](#clone-this-git-repository)
+  * [Python environment](#python-environment)
+- [Development / Contributions](#development---contributions)
+  * [Test the OpenTREP Python extension](#test-the-opentrep-python-extension)
 
+<small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
+
+# Overview
+[This README](https://github.com/infra-helpers/induction-monitoring/blob/master/python/README.md)
+is part of the
+[Induction Monitoring project](https://github.com/infra-helpers/induction-monitoring),
+itself aiming at providing end-to-end examples introducing how to collect, store
+and query metering events, produced by different sensors on local as well
+as on clouds.
+
+The `python/` sub-folder provides a base Python library, namely `datamonitor`,
+offering a few methods to collect Key Performance Indicators (KPI) from
+data files. Those KPIs are then typically wrapped into JSON structures
+and sent to an Elasticsearch (ES) service. The KPIs then form corresponding
+time-series, which can be further analyzed with Kibana, or any other analytical
+tool, typically for detection of outliers and alert notifications.
 
 # References
 
+## Python module
+* GitHub:
+  https://github.com/infra-helpers/induction-monitoring/tree/master/python
+* PyPi: https://pypi.org/project/datamonitor/
+* Read the Docs (RTD):
+  https://readthedocs.org/projects/datamonitoring/
 
+## Python virtual environments
+* Pyenv and pipenv:
+  http://github.com/machine-learning-helpers/induction-python/tree/master/installation/virtual-env
 
 # Installation
-
 
 ## Clone this Git repository
 ```bash
