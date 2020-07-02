@@ -15,7 +15,7 @@ their purpose is different. See the [GitHub repository dedicated to
 logging](https://github.com/infra-helpers/induction-logging)
 for further details.
 
-In those tutorials, Elastic Search (ES) stacks (_e.g._, ELK, EFK) are used.
+In those tutorials, Elasticsearch (ES) stacks (_e.g._, ELK, EFK) are used.
 A full end-to-end example is explained step by step, and actually used for the
 [Quality Assurance (QA)](https://github.com/opentraveldata/quality-assurance)
 of the [Open Travel Data (OPTD)
@@ -33,6 +33,15 @@ process](https://travis-ci.org/github/opentraveldata/opentraveldata).
 For convenience, most of the ES examples are demonstrated both on a local
 single-node installation (_e.g._, on a laptop) and on on the above-mentioned
 cluster.
+
+This project also features, in a
+[dedicated `python/` sub-folder](python/datamonitor/), a
+[`datamonitor` Python module](https://pypi.org/project/datamonitor),
+supporting:
+* collecting Key Performance Indicators (KPI) from data files
+* and sending meta-data JSON documents to the ES service
+
+[Travis manages the CI pipeline](https://travis-ci.org/github/infra-helpers/induction-monitoring).
 
 ## Endpoints
 * ElasticSearch (ES):

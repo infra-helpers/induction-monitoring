@@ -25,7 +25,7 @@ def read(*names, **kwargs):
 
 setup(
     name='datamonitor',
-    version='0.0.0',
+    version='0.0.1',
     license='MIT',
     description='Python utility to monitor metadata KPI',
     long_description='%s\n%s' % (
@@ -55,7 +55,7 @@ setup(
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: Implementation :: CPython',
         # uncomment if you test on these interpreters:
-        #'Programming Language :: Python :: Implementation :: PyPy',
+        # 'Programming Language :: Python :: Implementation :: PyPy',
         # 'Programming Language :: Python :: Implementation :: IronPython',
         # 'Programming Language :: Python :: Implementation :: Jython',
         # 'Programming Language :: Python :: Implementation :: Stackless',
@@ -71,6 +71,7 @@ setup(
     ],
     python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*',
     install_requires=[
+        'elasticsearch',
         # eg: 'aspectlib==1.1.1', 'six>=1.7',
     ],
     extras_require={
@@ -84,4 +85,3 @@ setup(
         ]
     },
 )
-

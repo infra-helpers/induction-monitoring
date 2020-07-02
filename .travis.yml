@@ -33,6 +33,7 @@ install:
   - easy_install --version
   - pip --version
   - tox --version
+before_script: cd python/datamonitor
 script:
   - tox -v
 after_failure:

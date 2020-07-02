@@ -115,10 +115,53 @@ py38
 report
 ```
 
+# Usage
+
+## Install the `datamonitor` module
+* Install and use the `datamonitor` module in the user space (with `pip`):
+```bash
+$ python -m pip uninstall datamonitor
+$ python -m pip install -U datamonitor
+```
+
+* Install and use the `datamonitor` module in a virtual environment:
+```bash
+$ pipenv shell
+(python-iVzKEypY) ✔ python -m pip install -U datamonitor
+(python-iVzKEypY) ✔ python -m datamonitor hello world
+['hello', 'world']
+(python-iVzKEypY) ✔ exit
+```
+
+* In the remainder of that section, it will be assumed that the `datamonitor`
+  module has been installed and readily available from the environment,
+  whether that environment is virtual or not.
+  In other words, to adapt the documentation for the case where `pipenv`
+  is used, just add `pipenv run` in front of every Python-related command.
+
+## From the Command-Line (CLI)
+* Install and use the `datamonitor` module
+  + In the user space (with `pip`):
+```bash
+$ python -m pip uninstall datamonitor
+$ python -m pip install -U datamonitor
+```
+  + In a virtual environment:
+```bash
+$ pipenv shell
+(python-iVzKEypY) ✔ python -m pip install -U datamonitor
+(python-iVzKEypY) ✔ python -m datamonitor hello world
+['hello', 'world']
+(python-iVzKEypY) ✔ exit
+```
+
+## As a module from another Python program
+
+
 # Development / Contributions
 * Build the source distribution and Python artifacts (wheels):
 ```bash
-$ rm -rf build/ && rm -rf dist/
+$ rm -rf dist build */*.egg-info *.egg-info
 $ pipenv run python setup.py sdist bdist_wheel
 ```
 
@@ -178,7 +221,7 @@ build succeeded.
 The HTML pages are in build/sphinx/html.
 ```
 
-## Test the OpenTREP Python extension
+## Test the DataMonitor Python module
 * Enter into the `pipenv` Shell:
 ```bash
 $ pipenv shell
@@ -191,7 +234,12 @@ Python 3.8.3
 (python-iVzKEypY) ✔ python -m pip install -U datamonitor
 ```
 
-* Launch a simple end-to-end test with `pytest`
+* Delete any previously created `dm-test-v0` ES index:
+```bash
+$ curl -XDELETE http://localhost:9200/dm-test-v0
+```
+
+* Launch a simple test with `pytest`
 ```bash
 (python-iVzKEypY) ✔ python -m pytest datamonitor/tests
 =================== test session starts ===========================
@@ -201,6 +249,27 @@ collected 1 item
 datamonitor/tests/test_datamonitor.py
 
 ========================== 1 passed in 0.06s ======================
+```
+
+* Check that a document has been created on ES. When the ES service is made
+  from a single node (_e.g._, on a laptop or a local installation), the status
+  of the index will be yellow. That is because the documents cannot be
+  replicated:
+```bash
+(python-iVzKEypY) ✔ curl -XGET http://localhost:9200/_cat/indices/dm-test-v0
+yellow open dm-test-v0 GXEUJjtkRjev3_wSn-5HOg 1 1 1 0 3.7kb 3.7kb
+```
+
+* Drop the replication requirement:
+```bash
+(python-iVzKEypY) ✔ curl -XPUT http://localhost:9200/dm-test-v0/_settings -H "Content-Type: application/json" --data "@../elasticseearch/settings/kibana-read-only.json"
+```
+
+* Check again the status of the `dm-test-v0` index, which should have become
+  green:
+```bash
+(python-iVzKEypY) ✔ curl -XGET http://localhost:9200/_cat/indices/dm-test-v0
+green open dm-test-v0 GXEUJjtkRjev3_wSn-5HOg 1 0 1 0 3.8kb 3.8kb
 ```
 
 * Exit the `pipenv` Shell:
