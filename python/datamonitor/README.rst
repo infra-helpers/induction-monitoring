@@ -15,8 +15,8 @@ Overview
     * - package
       - | |version| |wheel| |supported-versions| |supported-implementations|
         | |commits-since|
-.. |docs| image:: https://readthedocs.org/projects/datamonitor/badge/?style=flat
-    :target: https://readthedocs.org/projects/datamonitor
+.. |docs| image:: https://readthedocs.org/projects/datamonitoring/badge/?style=flat
+    :target: https://readthedocs.org/projects/datamonitoring
     :alt: Documentation Status
 
 .. |travis| image:: https://api.travis-ci.org/infra-helpers/induction-monitoring.svg?branch=master
