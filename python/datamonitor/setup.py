@@ -25,7 +25,7 @@ def read(*names, **kwargs):
 
 setup(
     name='datamonitor',
-    version='0.0.1.post1',
+    version='0.0.1.post2',
     license='MIT',
     description='Python utility to monitor metadata KPI',
     long_description='%s\n%s' % (
