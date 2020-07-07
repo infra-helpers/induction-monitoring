@@ -4,7 +4,7 @@
 #
 #
 from elasticsearch import Elasticsearch
-
+import bz2
 
 class DataMonitor:
     """
