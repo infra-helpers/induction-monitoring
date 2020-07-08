@@ -6,6 +6,7 @@
 from elasticsearch import Elasticsearch
 import bz2
 from itertools import (takewhile, repeat)
+from elasticmock import elasticmock
 
 class DataMonitor:
     """
@@ -29,7 +30,7 @@ class DataMonitor:
         """Description of the DataMonitor instance"""
         desc = f"DataMonitor - ES URL: {self.es_url}"
         return desc
-
+    @elasticmock
     def es_connect(self, conn=dict()):
         """Create and store a connection to an Elasticsearch (ES) service"""
         if 'host' in conn:
@@ -61,7 +62,8 @@ class DataMonitor:
             self.es_conn = Elasticsearch(hosts=self.es_host,
                                          scheme=self.es_scheme,
                                          port=self.es_port)
-
+    
+    @elasticmock
     def es_send(self, index=None, payload=dict()):
         """Send a JSON payload to an Elasticsearch (ES) service"""
         if not index:
