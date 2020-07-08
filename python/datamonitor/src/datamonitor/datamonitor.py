@@ -5,6 +5,7 @@
 #
 from elasticsearch import Elasticsearch
 import bz2
+from itertools import (takewhile, repeat)
 
 class DataMonitor:
     """
