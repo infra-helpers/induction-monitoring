@@ -30,6 +30,7 @@ class DataMonitor:
         """Description of the DataMonitor instance"""
         desc = f"DataMonitor - ES URL: {self.es_url}"
         return desc
+    
     @elasticmock
     def es_connect(self, conn=dict()):
         """Create and store a connection to an Elasticsearch (ES) service"""
