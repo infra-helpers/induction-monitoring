@@ -1,7 +1,9 @@
-
+#from unittest import TestCase
 from datamonitor.datamonitor import DataMonitor
+from elasticmock import elasticmock
 
 
+@elasticmock
 def test_main():
 
     # Create an empty Datamonitor class instance

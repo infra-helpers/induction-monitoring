@@ -30,8 +30,7 @@ class DataMonitor:
         """Description of the DataMonitor instance"""
         desc = f"DataMonitor - ES URL: {self.es_url}"
         return desc
-    
-    @elasticmock
+
     def es_connect(self, conn=dict()):
         """Create and store a connection to an Elasticsearch (ES) service"""
         if 'host' in conn:
@@ -64,7 +63,6 @@ class DataMonitor:
                                          scheme=self.es_scheme,
                                          port=self.es_port)
     
-    @elasticmock
     def es_send(self, index=None, payload=dict()):
         """Send a JSON payload to an Elasticsearch (ES) service"""
         if not index:
@@ -78,7 +76,7 @@ class DataMonitor:
         #
         return res
 
-    def calculate_nb_of_rows_in_file(filepath):   
+    def calculate_nb_of_rows_in_file(filepath):
         """
         Count the number of lines in a text file.
         Inspired from https://stackoverflow.com/a/27518377/798053
