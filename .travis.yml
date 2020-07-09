@@ -35,7 +35,7 @@ install:
   - tox --version
 before_script: cd python/datamonitor
 script:
-  - tox -v
+  - tox -v 
 after_failure:
   - more .tox/log/* | cat
   - more .tox/*/log/* | cat
