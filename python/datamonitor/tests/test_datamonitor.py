@@ -4,7 +4,7 @@ from elasticmock import elasticmock
 
 class DataMonitoringTest(TestCase):
     @elasticmock
-    def should_connect_and_send_object(self):
+    def test_should_connect_and_send_object(self):
         # Create an empty Datamonitor class instance
         dm = DataMonitor()
 
