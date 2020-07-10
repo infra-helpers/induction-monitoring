@@ -10,9 +10,9 @@ class DataMonitoringTest(TestCase):
         dm = DataMonitor()
 
         # Connect to Elasticsearch (ES)
-        #es_conn = {'host': 'localhost', 'port': 9200, 'scheme': 'http'}
-        #dm.es_connect(es_conn)
-        
+        es_conn = {'host': 'localhost', 'port': 9200, 'scheme': 'http'}
+        res = dm.es_connect(es_conn)
+        self.assertIsNotNone(res)
         # Debug
         print(f"DataMonitor class instance: {dm}")
     
