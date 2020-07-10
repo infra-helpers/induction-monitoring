@@ -6,7 +6,6 @@
 from elasticsearch import Elasticsearch
 import bz2
 from itertools import (takewhile, repeat)
-from elasticmock import elasticmock
 
 class DataMonitor:
     #Helper class with a few utility methods supporting collecting KPIs
