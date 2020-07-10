@@ -21,7 +21,7 @@ class DataMonitoringTest(TestCase):
         print(f"DataMonitor class instance: {dm}")
     
         # Send some simple payload to ES
-        dm.es_send(es_index, meta_data)
+        res_2 = dm.es_send(es_index, meta_data)
         
         # Debug
-        print(f"Result of sending to ES: {res}")
+        print(f"Result of sending to ES: {res2}")
