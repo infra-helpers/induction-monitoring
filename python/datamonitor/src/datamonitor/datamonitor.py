@@ -9,13 +9,11 @@ from itertools import (takewhile, repeat)
 from elasticmock import elasticmock
 
 class DataMonitor:
-    """
-    Helper class with a few utility methods supporting collecting KPIs
-    (Key Performance Indicators) from data files and monitoring those KPI
-    on tools like Elasticsearch (ES) service.
-
-    Technically, the KPIs collected from data are meta-data.
-    """
+    #Helper class with a few utility methods supporting collecting KPIs
+    #(Key Performance Indicators) from data files and monitoring those KPI
+    #on tools like Elasticsearch (ES) service.
+    #Technically, the KPIs collected from data are meta-data.
+    
     def __init__(self):
         self.es_host = 'localhost'
         self.es_port = 9200
@@ -27,12 +25,12 @@ class DataMonitor:
         self.es_conn = None
 
     def __str__(self):
-        """Description of the DataMonitor instance"""
+        #Description of the DataMonitor instance
         desc = f"DataMonitor - ES URL: {self.es_url}"
         return desc
 
     def es_connect(self, conn=dict()):
-        """Create and store a connection to an Elasticsearch (ES) service"""
+        #Create and store a connection to an Elasticsearch (ES) service
         if 'host' in conn:
             self.es_host = conn['host']
 
@@ -64,7 +62,7 @@ class DataMonitor:
                                          port=self.es_port)
     
     def es_send(self, index=None, payload=dict()):
-        """Send a JSON payload to an Elasticsearch (ES) service"""
+        #Send a JSON payload to an Elasticsearch (ES) service
         if not index:
             raise Exception("An Elasticsearch (ES) index should be speficied")
 
@@ -77,10 +75,9 @@ class DataMonitor:
         return res
 
     def calculate_nb_of_rows_in_file(filepath):
-        """
-        Count the number of lines in a text file.
-        Inspired from https://stackoverflow.com/a/27518377/798053
-        """
+        #Count the number of lines in a text file.
+        #Inspired from https://stackoverflow.com/a/27518377/798053
+        
         bufgen = None
         with bz2.open (filepath, 'rb') as f:
             bufgen = takewhile(lambda x: x, (f.read(1024*1024) for _ in repeat(None)))
