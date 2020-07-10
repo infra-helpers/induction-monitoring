@@ -15,14 +15,15 @@ class DataMonitoringTest(TestCase):
 
         # Connect to Elasticsearch (ES), elasticmock
         es_conn = {'host': 'localhost', 'port': 9200, 'scheme': 'http'}
-        res = dm.es_connect()
-        #self.assertIsNotNone(res)
+        res = dm.es_connect(es_conn)
+        self.assertIsNotNone(res)
+        
         # Debug
         print(f"DataMonitor class instance: {dm}")
     
         # Send some simple payload to ES
 
-        dm.es_send(es_index, meta_data)
+        #dm.es_send(es_index, meta_data)
         #self.assertIsNotNone(res)
         
         # Debug
