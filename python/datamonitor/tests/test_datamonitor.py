@@ -14,7 +14,7 @@ class DataMonitoringTest(TestCase):
         dm = DataMonitor()
 
         # Connect to Elasticsearch (ES), elasticmock
-        #es_conn = {'host': 'localhost', 'port': 9200, 'scheme': 'http'}
+        es_conn = {'host': 'localhost', 'port': 9200, 'scheme': 'http'}
         res = dm.es_connect()
         #self.assertIsNotNone(res)
         # Debug
