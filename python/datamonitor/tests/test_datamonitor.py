@@ -18,13 +18,13 @@ class  DataMonitoringTest(TestCase):
         print(f"DataMonitor class instance: {dm}")
         
         # Connect to Elasticsearch (ES), elasticmock
-        res = dm.es_connect(es_conn)
+        res = self.dm.es_connect(es_conn)
         
         # Debug
         print(f"Result of sending to ES: {res}")
         
         # Send some simple payload to ES
-        res_2 = res.index(index=es_index, doc_type='_doc', body=meta_data)
+        res_2 = self.es_conn.index(index=es_index, doc_type='_doc', body=meta_data)
         
         # Debug
         print(f"Result of sending to ES: {res_2}")
