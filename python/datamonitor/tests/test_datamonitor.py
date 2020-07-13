@@ -24,7 +24,7 @@ class  DataMonitoringTest(TestCase):
         print(f"Result of sending to ES: {res}")
         
         # Send some simple payload to ES
-        id = dm.index(index, meta_data)
+        id = dm.es_conn.index(index, meta_data)
         
         # Debug
         print(f"Result of sending to ES: {id}")
