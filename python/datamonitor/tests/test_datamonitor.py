@@ -2,7 +2,7 @@ from unittest import TestCase
 from datamonitor.datamonitor import DataMonitor
 from elasticmock import elasticmock
 
-class DataMonitoringTest(TestCase):
+class  DataMonitoringTest(TestCase):
     
     @elasticmock
     def test_should_connect_and_send_object(self):
