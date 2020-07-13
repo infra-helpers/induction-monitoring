@@ -24,4 +24,4 @@ class DataMonitoringTest(TestCase):
         res_2 = dm.es_send(es_index, meta_data)
         
         # Debug
-        print(f"Result of sending to ES: {res2}")
+        print(f"Result of sending to ES: {res_2}")
