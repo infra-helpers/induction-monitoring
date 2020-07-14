@@ -28,7 +28,7 @@ before_install:
   - uname -a
   - lsb_release -a || true
 install:
-  - python -mpip install --progress-bar=off tox -rpython/datamonitor/ci/requirements-dev.txt
+  - python -mpip install --progress-bar=off tox elasticmock elasticsearch
   - virtualenv --version
   - easy_install --version
   - pip --version
