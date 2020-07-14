@@ -15,14 +15,12 @@ sphinx-rtd-theme = "*"
 setuptools = "*"
 pyjq = "*"
 flake8 = "*"
+cryptography = "*"
+ElasticMock = "*"
 
 [packages]
 elasticsearch = "*"
 datetime = "*"
-gunicorn = "*"
-apache-airflow = {extras = ["elasticserch"], version = "*"}
-psycopg2 = "*"
-typing-extensions = "*"
 cryptography = "*"
 
 [requires]

@@ -44,6 +44,23 @@ tool, typically for detection of outliers and alert notifications.
 * Pyenv and pipenv:
   http://github.com/machine-learning-helpers/induction-python/tree/master/installation/virtual-env
 
+## Elasticsearch (ES) Python modules
+
+### Python Elasticsearch client
+* ReadTheDocs (RTD): https://elasticsearch-py.readthedocs.io/en/master/
+* PyPi: https://pypi.org/project/elasticsearch
+* GitHub: https://github.com/elastic/elasticsearch-py/blob/master/docs/index.rst
+
+### Elasticsearch DSL
+* ReadTheDocs (RTD): https://elasticsearch-dsl.readthedocs.io/en/latest/
+* PyPi: https://pypi.org/project/elasticsearch-dsl/
+* GitHub:
+  https://github.com/elastic/elasticsearch-dsl-py/blob/master/docs/index.rst
+
+### ElasticMock
+* PyPi: https://pypi.org/project/ElasticMock/
+* GitHub: https://github.com/vrcmarcos/elasticmock
+
 # Installation
 
 ## Clone this Git repository
@@ -92,7 +109,9 @@ $ python3 -m pip install -U pipenv
 ```
 
 * For information, the skeleton of that project was created thanks to the
-  [Cookiecutter template for Python library](https://github.com/ionelmc/cookiecutter-pylibrary):
+  [Cookiecutter template for Python library](https://github.com/ionelmc/cookiecutter-pylibrary).
+  The following was performed once, and it does not need to be ever performed
+  again:
 ```bash
 $ pipenv run cookiecutter gh:ionelmc/cookiecutter-pylibrary
 $ cd datamonitor
@@ -118,47 +137,107 @@ report
 # Usage
 
 ## Install the `datamonitor` module
+* There are at least two ways to install the `datamonitor` module,
+  in the Python user space with `pip` and in a dedicated virtual environment
+  with `pipenv`.
+  + Both options may be installed in parallel
+  + The Python user space (typically, `/usr/local/opt/python@3.8` on MacOS
+    or `~/.pyenv/versions/3.8.3` on Linux) may already have many other modules
+	installed, parasiting a fine-grained control over the versions of every
+	Python dependency. If all the versions are compatible, then that option
+	is convenient as it is available from the whole user space, not just
+	from this sub-directory
+
+* In the remainder of that [Usage section](#usage), it will be assumed
+  that the `datamonitor` module has been installed and readily available
+  from the environment, whether that environment is virtual or not.
+  In other words, to adapt the documentation for the case where `pipenv`
+  is used, just add `pipenv run` in front of every Python-related command.
+
+### Install in the Python user space
 * Install and use the `datamonitor` module in the user space (with `pip`):
 ```bash
 $ python -m pip uninstall datamonitor
 $ python -m pip install -U datamonitor
 ```
 
+### Installation in a dedicated Python virtual environment
 * Install and use the `datamonitor` module in a virtual environment:
 ```bash
 $ pipenv shell
 (python-iVzKEypY) ✔ python -m pip install -U datamonitor
-(python-iVzKEypY) ✔ python -m datamonitor hello world
-['hello', 'world']
+(python-iVzKEypY) ✔ python -m pip install -U datamonitor
 (python-iVzKEypY) ✔ exit
 ```
 
-* In the remainder of that section, it will be assumed that the `datamonitor`
-  module has been installed and readily available from the environment,
-  whether that environment is virtual or not.
-  In other words, to adapt the documentation for the case where `pipenv`
-  is used, just add `pipenv run` in front of every Python-related command.
+## Remove any previous document from the ES index
+* Delete any previously created document from the target index,
+  _e.g._ `dm-test-v0`, or drop the full index altogether:
+```bash
+$ curl -XDELETE http://localhost:9200/dm-test-v0
+```
 
-## From the Command-Line (CLI)
+## Use `datamonitor` from the Command-Line (CLI)
 * Install and use the `datamonitor` module
   + In the user space (with `pip`):
 ```bash
-$ python -m pip uninstall datamonitor
-$ python -m pip install -U datamonitor
+$ python -m datamonitor hello world
+['hello', 'world']
 ```
   + In a virtual environment:
 ```bash
 $ pipenv shell
-(python-iVzKEypY) ✔ python -m pip install -U datamonitor
 (python-iVzKEypY) ✔ python -m datamonitor hello world
 ['hello', 'world']
 (python-iVzKEypY) ✔ exit
 ```
 
-## As a module from another Python program
+## Use `datamonitor` as a module from another Python program
+* Module import statement:
+```python
+>>> from datamonitor import DataMonitor
+```
 
+* Create an instance of the DataMonitor Python class:
+```python
+>>> dm = DataMonitor()
+```
 
-# Development / Contributions
+* Connect to the ES cluster/service:
+```python
+>>> es_conn_str = {'host': 'localhost', 'port': 9200, 'scheme': 'http'}
+>>> es_conn = dm.es_connect(es_conn_str)
+>>> es_conn
+<Elasticsearch([{'host': 'localhost'}])>
+```
+
+* Get the information/details about the ES cluster/service:
+```python
+>>> es_info = dm.es_info()
+>>> es_info
+{'name': 'MyFavoriteES', 'cluster_name': 'elasticsearch_gold', 'cluster_uuid': 'G6YM0RZsRtW3DjoMPsIx_A', 'version': {'number': '7.8.0', 'build_flavor': 'default', 'build_type': 'tar', 'build_hash': '757314695644ea9a1dc2fecd26d1a43856725e65', 'build_date': '2020-06-14T19:35:50.234439Z', 'build_snapshot': False, 'lucene_version': '8.5.1', 'minimum_wire_compatibility_version': '6.8.0', 'minimum_index_compatibility_version': '6.0.0-beta1'}, 'tagline': 'You Know, for Search'}
+```
+
+* Send some simple payload to ES. ES should return a JSON structure,
+  featuring, among other things, the created/assigned document ID:
+```python
+>>> meta_data_payload = {'unit': 'nb_of_rows', 'value': '6543'}
+>>> docid = dm.es_send(index='dm-kpi-v0', payload=meta_data_payload)
+>>> docid
+'0W0pT3MB2UaYMhH3DxFr'
+```
+
+* Extract back the same paylod from ES:
+```python
+>>> document_str = dm.es_get(index='dm-kpi-v0', docid=docid)
+>>> document_str
+{'_index': 'dm-kpi-v0', '_type': '_doc', '_id': '0W0pT3MB2UaYMhH3DxFr', '_version': 1, '_seq_no': 0, '_primary_term': 1, 'found': True, '_source': {'unit': 'nb_of_rows', 'value': '6543'}}
+>>> document = None if not '_source' in document_str else document_str['_source']
+>>> document
+{'unit': 'nb_of_rows', 'value': '6543'}
+```
+
+# Development / Contribution
 * Build the source distribution and Python artifacts (wheels):
 ```bash
 $ rm -rf dist build */*.egg-info *.egg-info
@@ -170,13 +249,13 @@ $ pipenv run python setup.py sdist bdist_wheel
 $ PYPIURL="https://test.pypi.org"
 $ pipenv run twine upload -u __token__ --repository-url ${PYPIURL}/legacy/ dist/*
 Uploading distributions to https://test.pypi.org/legacy/
-Uploading datamonitor-0.0.0-py2.py3-none-any.whl
+Uploading datamonitor-0.0.4-py2.py3-none-any.whl
 100%|███████████████████████████████████████| 9.85k/9.85k [00:02<00:00, 4.48kB/s]
-Uploading datamonitor-0.0.0.tar.gz
+Uploading datamonitor-0.0.4.tar.gz
 100%|███████████████████████████████████████| 18.8k/18.8k [00:01<00:00, 17.1kB/s]
 
 View at:
-https://test.pypi.org/project/datamonitor/0.0.0/
+https://test.pypi.org/project/datamonitor/0.0.4/
 ```
 
 * Upload/release the Python packages onto the
@@ -191,19 +270,30 @@ Password for '__token__' in '${PYPIURL}/':
 ```bash
 $ pipenv run twine upload -u __token__ --repository-url ${PYPIURL}/legacy/ dist/*
 Uploading distributions to https://upload.pypi.org/legacy/
-Uploading datamonitor-0.0.0-py2.py3-none-any.whl
-100%|███████████████████████████████████████| 9.85k/9.85k [00:05<00:00, 1.89kB/s]
-Uploading datamonitor-0.0.0.tar.gz
-100%|███████████████████████████████████████| 18.8k/18.8k [00:01<00:00, 17.3kB/s]
+Uploading datamonitor-0.0.4-py2.py3-none-any.whl
+100%|███████████████████████████████████████| 11.5k/11.5k [00:02<00:00, 5.84kB/s]
+Uploading datamonitor-0.0.4.tar.gz
+100%|███████████████████████████████████████| 20.7k/20.7k [00:01<00:00, 15.8kB/s]
 
 View at:
-https://pypi.org/project/datamonitor/0.0.0/
+https://pypi.org/project/datamonitor/0.0.4/
 ```
 
 * Note that the documentation is built automatically by ReadTheDocs (RTD)
   + The documentation is available from
     https://datamonitoring.readthedocs.io/en/latest/
   + The RTD project is setup on https://readthedocs.org/projects/datamonitoring/
+  + As of July 2020, the documentation is built from RST files, _e.g._,
+    [`README.rst`](https://github.com/infra-helpers/induction-monitoring/blob/master/python/datamonitor/README.rst)
+	and documentation files in the
+	[`docs` sub-directory](https://github.com/infra-helpers/induction-monitoring/blob/master/python/datamonitor/docs/).
+	The author is a lot more familiar with MarkDown (MD) format,
+	and would welcome help in translating the documentation generation
+	configuration to use MD- rather than RST-based files.
+	Do not hesitate to
+	[create an issue](https://github.com/infra-helpers/induction-monitoring/issues)
+	or, even better, submit a
+	[pull request](https://github.com/infra-helpers/induction-monitoring/pulls)
 
 * Build the documentation manually (with [Sphinx](http://sphinx-doc.org)):
 ```bash
@@ -222,6 +312,19 @@ The HTML pages are in build/sphinx/html.
 ```
 
 ## Test the DataMonitor Python module
+* The tests use [ElasticMock](https://github.com/vrcmarcos/elasticmock),
+  which emulates, in a very simple and limited way, an Elasticsearch (ES)
+  cluster/service.
+
+* If ES cluster/service is already running locally on the ES default port
+  (9200), it must be temporarily shutdown, as the default parameters for
+  ElasticMock would otherwise have both ES services step on each other toes.
+  For instance:
+  + On MacOs, `brew stop elasticsearch-full` (and
+    `brew start elasticsearch-full` to restart it afterwards)
+  + On SystemD-based Linux distributions, `sudo systemctl stop elasticsearch`
+    (and `sudo systemctl start elasticsearch` to restart afterwards)
+
 * Enter into the `pipenv` Shell:
 ```bash
 $ pipenv shell
@@ -229,19 +332,14 @@ $ pipenv shell
 Python 3.8.3
 ```
 
-* Install the `datamonitor` module/library:
+* Uninstall any previously installed `datamonitor` module/library:
 ```bash
-(python-iVzKEypY) ✔ python -m pip install -U datamonitor
-```
-
-* Delete any previously created `dm-test-v0` ES index:
-```bash
-$ curl -XDELETE http://localhost:9200/dm-test-v0
+(python-iVzKEypY) ✔ python -m pip uninstall datamonitor
 ```
 
 * Launch a simple test with `pytest`
 ```bash
-(python-iVzKEypY) ✔ python -m pytest datamonitor/tests
+(python-iVzKEypY) ✔ python -m pytest test_datamonitor.py
 =================== test session starts ===========================
 platform darwin -- Python 3.8.3, pytest-5.4.3, py-1.9.0, pluggy-0.13.1
 rootdir: ~/dev/infra/induction-monitoring/python/datamonitor, inifile: setup.cfg

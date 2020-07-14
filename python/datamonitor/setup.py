@@ -1,18 +1,11 @@
-#!/usr/bin/env python
 # -*- encoding: utf-8 -*-
 from __future__ import absolute_import
 from __future__ import print_function
 
-import io
-import re
+import io, re
 from glob import glob
-from os.path import basename
-from os.path import dirname
-from os.path import join
-from os.path import splitext
-
-from setuptools import find_packages
-from setuptools import setup
+from os.path import basename, dirname, join, splitext
+from setuptools import find_packages, setup
 
 
 def read(*names, **kwargs):
@@ -25,7 +18,7 @@ def read(*names, **kwargs):
 
 setup(
     name='datamonitor',
-    version='0.0.3',
+    version='0.0.4.post1',
     license='MIT',
     description='Python utility to monitor metadata KPI',
     long_description='%s\n%s' % (
@@ -35,9 +28,9 @@ setup(
     author='Denis Arnaud',
     author_email='denis.arnaud_fedora@m4x.org',
     url='https://github.com/infra-helpers/induction-monitoring/python',
-    packages=find_packages('src'),
-    package_dir={'': 'src'},
-    py_modules=[splitext(basename(path))[0] for path in glob('src/*.py')],
+    packages=find_packages('datamonitor'),
+    package_dir={'': 'datamonitor'},
+    py_modules=[splitext(basename(path))[0] for path in glob('datamonitor/*.py')],
     include_package_data=True,
     zip_safe=False,
     classifiers=[
