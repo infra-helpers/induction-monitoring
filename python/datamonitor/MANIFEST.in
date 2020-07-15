@@ -1,5 +1,5 @@
 graft docs
-graft src
+graft datamonitor
 graft ci
 graft tests
 
@@ -16,4 +16,7 @@ include README.rst
 
 include tox.ini .travis.yml .appveyor.yml .readthedocs.yml
 
+include test_*.py
+
 global-exclude *.py[cod] __pycache__/* *.so *.dylib
+
