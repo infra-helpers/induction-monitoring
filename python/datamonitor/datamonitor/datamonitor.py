@@ -5,8 +5,12 @@
 # Authors: Denis Arnaud, Michal Mendrygal
 #
 
-import os, bz2, inspect, elasticsearch
+import os
+import bz2
+import inspect
+import elasticsearch
 from itertools import (takewhile, repeat)
+
 
 class DataMonitor():
     """
@@ -14,10 +18,10 @@ class DataMonitor():
     (Key Performance Indicators) from data files and monitoring those KPI
     on tools like Elasticsearch (ES) service.
     Technically, the KPIs collected from data are meta-data.
-    
+
     Log levels: 1. Critical; 2. Errors; 3: Warnings; 4: Info; 5: Verbose
     """
-    
+
     def __init__(self):
         self.es_host = 'localhost'
         self.es_port = 9200
@@ -43,7 +47,9 @@ class DataMonitor():
         try:
             level_int = int(level)
             self.log_level = level_int if level_int >= 1 and level_int <= 5 else self.log_level
-        except:
+        except ValueError as verr:
+            log_pfx = self.get_log_pfx()
+            print(f"{log_pfx} ERROR - The log level parameter should be an integer between 1 and 5; it is currently {level} - {verr}")
             pass
 
     def get_log_pfx(self):
@@ -56,10 +62,10 @@ class DataMonitor():
 
         frame = callerframerecord[0]
         info = inspect.getframeinfo(frame)
-        filename = os.path.basename (info.filename)
+        filename = os.path.basename(info.filename)
         log_pfx = f"[DM][{filename}][{info.function}][{info.lineno}] -"
         return log_pfx
-    
+
     def es_connect(self, conn=dict()):
         """
         Create and store a connection to an Elasticsearch (ES) service
@@ -95,7 +101,7 @@ class DataMonitor():
                                                        port=self.es_port)
 
         return self.es_conn
-    
+
     def es_info(self):
         """
         Get the ES cluster information
@@ -115,7 +121,7 @@ class DataMonitor():
         Send a JSON payload to an Elasticsearch (ES) service
         """
         doc_id = None
-        
+
         if not index:
             raise Exception("An Elasticsearch (ES) index should be specified")
 
@@ -123,11 +129,12 @@ class DataMonitor():
                                                   body=payload)
         if '_id' in doc_creation_details:
             doc_id = doc_creation_details['_id']
-        
+
         # Debug
         if self.log_level >= 4:
             log_pfx = self.get_log_pfx()
-            print(f"{log_pfx} Sent to ES ({self.es_url}/{index}; assigned doc ID: {doc_id}; doc creation structure: {doc_creation_details}): {payload}")
+            print(f"{log_pfx} Doc sent to ES ({self.es_url}/{index}) was assigned {doc_id} as doc ID")
+            print(f"{log_pfx} Doc creation structure: {doc_creation_details} - Sent doc: {payload}")
 
         #
         return doc_id
@@ -151,15 +158,15 @@ class DataMonitor():
 
         #
         return doc_str
-  
+
     def calculate_nb_of_rows_in_file(filepath):
         """
         Count the number of lines in a text file.
         Inspired from https://stackoverflow.com/a/27518377/798053
         """
-        
+
         bufgen = None
-        with bz2.open (filepath, 'rb') as f:
+        with bz2.open(filepath, 'rb') as f:
             bufgen = takewhile(lambda x: x,
-                               (f.read(1024*1024) for _ in repeat(None)))
-            return sum (buf.count(b'\n') for buf in bufgen)
+                               (f.read(1024 * 1024) for _ in repeat(None)))
+            return sum(buf.count(b'\n') for buf in bufgen)

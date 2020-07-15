@@ -2,7 +2,8 @@
 from __future__ import absolute_import
 from __future__ import print_function
 
-import io, re
+import io
+import re
 from glob import glob
 from os.path import basename, dirname, join, splitext
 from setuptools import find_packages, setup
