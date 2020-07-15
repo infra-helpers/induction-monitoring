@@ -75,7 +75,7 @@ Documentation
 =============
 
 
-https://datamonitor.readthedocs.io/
+https://datamonitoring.readthedocs.io/
 
 
 Development
