@@ -5,11 +5,13 @@
 # Authors: Denis Arnaud, Michal Mendrygal
 #
 
-import os
 import bz2
 import inspect
+import os
+from itertools import repeat
+from itertools import takewhile
+
 import elasticsearch
-from itertools import (takewhile, repeat)
 
 
 class DataMonitor():

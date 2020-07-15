@@ -6,7 +6,9 @@
 #
 
 from unittest import TestCase
+
 from elasticmock import elasticmock
+
 from datamonitor import DataMonitor
 
 
