@@ -61,7 +61,7 @@ setup(
         'Topic :: Utilities',
     ],
     project_urls={
-        'Documentation': 'https://datamonitoring.readthedocs.io/',
+        'Documentation': 'https://datamonitoring.readthedocs.io/en/latest/',
         'Changelog': 'https://datamonitoring.readthedocs.io/en/latest/changelog.html',
         'Issue Tracker': 'https://github.com/infra-helpers/induction-monitoring/issues',
     },
