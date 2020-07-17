@@ -46,11 +46,11 @@ class DataMonitoringTest(TestCase):
         # Debug
         print(f"Details for the ES cluster: {es_info}")
 
+        # Empty index
+        self.assertIsNotNone(es_index)
+
         # Send some simple payload to ES
         docid = dm.es_send(index=es_index, payload=expected_document)
-
-        #empty index
-        docid_ix = dm.es_send(index=es_index, payload=expected_document)
 
         # Debug
         print(f"Document ID, as provided by ES: {docid}")
