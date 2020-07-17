@@ -28,9 +28,9 @@ class DataMonitoringTest(TestCase):
         log2 = dm.set_log_level(2)
         log_try = dm.set_log_level("6")
         log_exc = dm.set_log_level("string")
-        self.assertIsNot(log2)
-        self.assertIsNot(log_try)
-        self.assertIsNot(log_exc)
+        self.assertIsNone(log2)
+        self.assertIsNone(log_try)
+        self.assertIsNone(log_exc)
         dm.set_log_level(4)
 
         # Connect to Elasticsearch (ES), mocked by elasticmock here
