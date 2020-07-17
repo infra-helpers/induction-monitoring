@@ -14,7 +14,6 @@ from datamonitor import DataMonitor
 
 class DataMonitoringTest(TestCase):
 
-
     @elasticmock
     def test_should_connect_and_send_object(self):
         # Variables used to test
@@ -25,13 +24,13 @@ class DataMonitoringTest(TestCase):
         # Create instance
         dm = DataMonitor()
 
-        #test log exceptions
+        # Test log exceptions
         log2 = dm.set_log_level(2)
         log_try = dm.set_log_level("6")
         log_exc = dm.set_log_level("string")
-        assert log2 == None
-        assert log_try == None
-        assert log_exc == None
+        self.assertIsNot(log2)
+        self.assertIsNot(log_try)
+        self.assertIsNot(log_exc)
         dm.set_log_level(4)
 
         # Connect to Elasticsearch (ES), mocked by elasticmock here
@@ -43,7 +42,6 @@ class DataMonitoringTest(TestCase):
         # Get the details of the ES cluster
         es_info = dm.es_info()
         self.assertIsNotNone(es_info.get('tagline'))
-
 
         # Debug
         print(f"Details for the ES cluster: {es_info}")
@@ -75,5 +73,3 @@ class DataMonitoringTest(TestCase):
         # The document retrieved from ES should be equal to the one
         # originally sent in the step above
         self.assertEqual(expected_document, document)
-
-
