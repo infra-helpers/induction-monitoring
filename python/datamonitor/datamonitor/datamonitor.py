@@ -161,7 +161,7 @@ class DataMonitor():
         #
         return doc_str
 
-    def calculate_nb_of_rows_in_file(self,filepath):
+    def calculate_nb_of_rows_in_file(self, filepath):
         """
         Count the number of lines in a text file.
         Inspired from https://stackoverflow.com/a/27518377/798053
