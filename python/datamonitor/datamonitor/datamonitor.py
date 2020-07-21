@@ -161,14 +161,40 @@ class DataMonitor():
         #
         return doc_str
 
-    def calculate_nb_of_rows_in_file(self, filepath):
+    def calculate_nb_of_rows_in_file(self, filepath=None):
         """
         Count the number of lines in a text file.
         Inspired from https://stackoverflow.com/a/27518377/798053
         """
+        o_nb_of_rows = -1
+        
+        if not filepath:
+            # Report
+            log_pfx = self.get_log_pfx()
+            print(f"{log_pfx} Error - The filepath parameter should be set, but is not")
+            return o_nb_of_rows
+
+        does_file_exist = os.path.exists(filepath)
+        if not does_file_exist:
+            # Report
+            log_pfx = self.get_log_pfx()
+            print(f"{log_pfx} Error - The {filepath} file does not seem to exist or is not accessible")
+            return o_nb_of_rows
+
+        # Debug
+        if self.log_level >= 4:
+            log_pfx = self.get_log_pfx()
+            print(f"{log_pfx} Counting the number of rows in the {filepath} file...")
 
         bufgen = None
         with bz2.open(filepath, 'rb') as f:
             bufgen = takewhile(lambda x: x,
                                (f.read(1024 * 1024) for _ in repeat(None)))
-            return sum(buf.count(b'\n') for buf in bufgen)
+            o_nb_of_rows = sum(buf.count(b'\n') for buf in bufgen)
+
+        # Debug
+        if self.log_level >= 4:
+            log_pfx = self.get_log_pfx()
+            print(f"{log_pfx} The number of rows in the {filepath} file is {o_nb_of_rows}")
+
+        return o_nb_of_rows
