@@ -4,18 +4,14 @@ from __future__ import print_function
 
 import io
 import re
-from glob import glob
-from os.path import basename
-from os.path import dirname
-from os.path import join
-from os.path import splitext
-
+import os
+import glob
 import setuptools
 
 
 def read(*names, **kwargs):
     with io.open(
-        join(dirname(__file__), *names),
+        os.path.join(os.path.dirname(__file__), *names),
         encoding=kwargs.get('encoding', 'utf8')
     ) as fh:
         return fh.read()
@@ -23,7 +19,7 @@ def read(*names, **kwargs):
 
 setuptools.setup(
     name='datamonitor',
-    version='0.0.5',
+    version='0.0.5.post1',
     license='MIT',
     description='Python utility to monitor metadata KPI',
     long_description='%s\n%s' % (
@@ -33,11 +29,11 @@ setuptools.setup(
     author='Denis Arnaud',
     author_email='denis.arnaud_fedora@m4x.org',
     url='https://github.com/infra-helpers/induction-monitoring/python',
-    packages=setuptools.find_packages('datamonitor'),
-    package_dir={'': 'datamonitor'},
-    #py_modules=[splitext(basename(path))[0] for path in glob('datamonitor/*.py')],
+    packages=setuptools.find_packages(),
+    #package_dir={'': 'datamonitor'},
+    #py_modules=[os.path.splitext(os.path.basename(path))[0] for path in glob.glob('datamonitor/*.py')],
     include_package_data=True,
-    zip_safe=False,
+    #zip_safe=False,
     classifiers=[
         # complete classifier list: http://pypi.python.org/pypi?%3Aaction=list_classifiers
         'Development Status :: 5 - Production/Stable',
@@ -65,13 +61,13 @@ setuptools.setup(
         'Issue Tracker': 'https://github.com/infra-helpers/induction-monitoring/issues',
     },
     keywords=[
-        # eg: 'keyword1', 'keyword2', 'keyword3',
+        'data', 'monitoring', 'data-monitoring', 'quality', 'quality-assurance',
+        'qa', 'kpi', 'metric', 'sensor'
     ],
     python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*',
     install_requires=[
         'elasticsearch',
         'elasticmock',
-        # eg: 'aspectlib==1.1.1', 'six>=1.7',
     ],
     extras_require={
         # eg:
