@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Source: https://github.com/infra-helpers/induction-monitoring/blob/master/python/datamonitor/datamonitor/DataMonitor.py
+# Source: https://github.com/infra-helpers/induction-monitoring/blob/master/python/datamonitor/datamonitor/datamonitor.py
 #
 # Authors: Denis Arnaud, Michal Mendrygal
 #

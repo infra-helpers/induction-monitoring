@@ -251,7 +251,7 @@ $ pipenv shell
 # Development / Contribution
 * Build the source distribution and Python artifacts (wheels):
 ```bash
-$ rm -rf dist build */*.egg-info *.egg-info .tox
+$ rm -rf dist build */*.egg-info *.egg-info .tox MANIFEST
 $ pipenv run python setup.py sdist bdist_wheel
 ```
 
