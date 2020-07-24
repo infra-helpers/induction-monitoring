@@ -19,7 +19,7 @@ def read(*names, **kwargs):
 
 setuptools.setup(
     name='datamonitor',
-    version='0.0.5.post1',
+    version='0.0.5.post2',
     license='MIT',
     description='Python utility to monitor metadata KPI',
     long_description='%s\n%s' % (
@@ -30,10 +30,8 @@ setuptools.setup(
     author_email='denis.arnaud_fedora@m4x.org',
     url='https://github.com/infra-helpers/induction-monitoring/python',
     packages=setuptools.find_packages(),
-    #package_dir={'': 'datamonitor'},
-    #py_modules=[os.path.splitext(os.path.basename(path))[0] for path in glob.glob('datamonitor/*.py')],
+    py_modules=[os.path.splitext(os.path.basename(path))[0] for path in glob.glob('datamonitor/*.py')],
     include_package_data=True,
-    #zip_safe=False,
     classifiers=[
         # complete classifier list: http://pypi.python.org/pypi?%3Aaction=list_classifiers
         'Development Status :: 5 - Production/Stable',
@@ -48,11 +46,6 @@ setuptools.setup(
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: Implementation :: CPython',
-        # uncomment if you test on these interpreters:
-        # 'Programming Language :: Python :: Implementation :: PyPy',
-        # 'Programming Language :: Python :: Implementation :: IronPython',
-        # 'Programming Language :: Python :: Implementation :: Jython',
-        # 'Programming Language :: Python :: Implementation :: Stackless',
         'Topic :: Utilities',
     ],
     project_urls={
