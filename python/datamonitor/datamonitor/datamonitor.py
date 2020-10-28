@@ -167,7 +167,7 @@ class DataMonitor():
         Inspired from https://stackoverflow.com/a/27518377/798053
         """
         o_nb_of_rows = -1
-        
+ 
         if not filepath:
             # Report
             log_pfx = self.get_log_pfx()
