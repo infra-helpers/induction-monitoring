@@ -2,11 +2,13 @@
 from __future__ import absolute_import
 from __future__ import print_function
 
-import io
-import re
-import os
 import glob
+import io
+import os
+import re
+
 import setuptools
+import skbuild
 
 
 def read(*names, **kwargs):
@@ -17,11 +19,12 @@ def read(*names, **kwargs):
         return fh.read()
 
 
-setuptools.setup(
+skbuild.setup(
     name='datamonitor',
-    version='0.0.5.post2',
+    version='0.0.5.post3',
     license='MIT',
     description='Python utility to monitor metadata KPI',
+    long_description_content_type='text/x-rst',
     long_description='%s\n%s' % (
         re.compile('^.. start-badges.*^.. end-badges', re.M | re.S).sub('', read('README.rst')),
         re.sub(':[a-z]+:`~?(.*?)`', r'``\1``', read('CHANGELOG.rst'))

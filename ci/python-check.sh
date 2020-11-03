@@ -1,5 +1,5 @@
 #!/bin/sh
 
-cd $TRAVIS_BUILD_DIR/python/datamonitoring
+cd $TRAVIS_BUILD_DIR/python/datamonitor
 tox -v
 

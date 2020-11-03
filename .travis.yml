@@ -2,16 +2,15 @@ language: python
 dist: focal
 cache: false
 env:
+env:
   global:
-    - LD_PRELOAD=/lib/x86_64-linux-gnu/libSegFault.so
-    - SEGFAULT_SIGNALS=all
-    - LANG=en_US.UTF-8
+  - LANG="en_US.UTF-8" LC_ALL="en_US.UTF-8" LD_PRELOAD="/lib/x86_64-linux-gnu/libSegFault.so" SEGFAULT_SIGNALS="all"
 matrix:
   include:
-    - python: '3.6'
+    - python: '3.8'
       env:
         - TOXENV=check
-    - python: '3.6'
+    - python: '3.8'
       env:
         - TOXENV=docs
     - env:
@@ -24,14 +23,15 @@ matrix:
         - TOXENV=py38
       python: '3.8'
 before_install:
-  - python --version
+  - python -V
   - uname -a
   - lsb_release -a || true
 install:
-  - python -mpip install --progress-bar=off tox flake8 pytest pytest-cov coverage pytest-travis-fold check-manifest elasticmock elasticsearch
+  - python -mpip install -U pip
+  - python -mpip install --progress-bar=off -U tox flake8 pytest pytest-cov coverage pytest-travis-fold check-manifest elasticmock elasticsearch
   - virtualenv --version
   - easy_install --version
-  - pip --version
+  - python -mpip --version
   - tox --version
 before_script: cd python/datamonitor
 script:
@@ -43,3 +43,4 @@ notifications:
   email:
     on_success: never
     on_failure: always
+
