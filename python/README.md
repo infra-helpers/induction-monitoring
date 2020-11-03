@@ -322,6 +322,17 @@ build succeeded.
 The HTML pages are in build/sphinx/html.
 ```
 
+* Re-generate the Python dependency files (`requirements.txt`)
+  for the CI/CD pipeline (currently Travis CI):
+```bash
+$ pipenv --rm; rm -f Pipfile.lock; pipenv install; pipenv install --dev
+$ git add Pipfile.lock
+$ pipenv lock -r > datamonitor/ci/requirements.txt
+$ pipenv lock --dev -r > datamonitor/ci/requirements-dev.txt
+$ git add datamonitor/ci/requirements.txt datamonitor/ci/requirements-dev.txt
+$ git commit -m "[CI] Upgraded the Python dependencies for the Travis CI pipeline"
+```
+
 ## Test the DataMonitor Python module
 * The tests use [ElasticMock](https://github.com/vrcmarcos/elasticmock),
   which emulates, in a very simple and limited way, an Elasticsearch (ES)
