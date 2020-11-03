@@ -8,7 +8,6 @@ import os
 import re
 
 import setuptools
-import skbuild
 
 
 def read(*names, **kwargs):
@@ -19,7 +18,7 @@ def read(*names, **kwargs):
         return fh.read()
 
 
-skbuild.setup(
+setuptools.setup(
     name='datamonitor',
     version='0.0.5.post3',
     license='MIT',
