@@ -21,13 +21,11 @@ sphinx-rtd-theme = "*"
 setuptools = "*"
 pyjq = "*"
 flake8 = "*"
-cryptography = "*"
 ElasticMock = "*"
 
 [packages]
 elasticsearch = "*"
 datetime = "*"
-cryptography = "*"
 
 [requires]
 python_version = "3.9"
