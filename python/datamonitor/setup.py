@@ -20,7 +20,7 @@ def read(*names, **kwargs):
 
 setuptools.setup(
     name='datamonitor',
-    version='0.0.5.post3',
+    version='0.0.5.post4',
     license='MIT',
     description='Python utility to monitor metadata KPI',
     long_description_content_type='text/x-rst',
