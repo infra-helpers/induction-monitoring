@@ -6,7 +6,7 @@
 #
 
 -i https://pypi.org/simple
-certifi==2021.5.30
+certifi==2022.12.7
 datetime==4.3
 elasticsearch==7.13.0
 pytz==2021.1
